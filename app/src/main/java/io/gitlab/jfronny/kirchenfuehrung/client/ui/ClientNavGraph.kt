@@ -17,6 +17,8 @@ import io.gitlab.jfronny.kirchenfuehrung.client.ui.ClientDestinations.TOUR_ID
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.about.AboutRoute
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.overview.OverviewRoute
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.overview.OverviewViewModel
+import io.gitlab.jfronny.kirchenfuehrung.client.ui.viewer.ViewerRoute
+import io.gitlab.jfronny.kirchenfuehrung.client.ui.viewer.ViewerViewModel
 
 @Composable
 fun ClientNavGraph(
@@ -57,16 +59,14 @@ fun ClientNavGraph(
             )
         ) { navBackStackEntry ->
             val tourId = navBackStackEntry.arguments?.getString(TOUR_ID)
-            Text(text = tourId ?: "null")
-            //TODO viewer
-//            val interestsViewModel: InterestsViewModel = viewModel(
-//                factory = InterestsViewModel.provideFactory(appContainer.toursRepository)
-//            )
-//            ViewerRoute(
-//                interestsViewModel = interestsViewModel,
-//                isExpandedScreen = isExpandedScreen,
-//                openDrawer = openDrawer
-//            )
+            val viewerViewModel: ViewerViewModel = viewModel(
+                factory = ViewerViewModel.provideFactory(appContainer.toursRepository, tourId)
+            )
+            ViewerRoute(
+                viewerViewModel = viewerViewModel,
+                isExpandedScreen = isExpandedScreen,
+                navigation = navigationActions
+            )
         }
     }
 }
