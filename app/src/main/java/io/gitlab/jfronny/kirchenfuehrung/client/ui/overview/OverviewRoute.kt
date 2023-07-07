@@ -48,11 +48,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import io.gitlab.jfronny.kirchenfuehrung.client.R
 import io.gitlab.jfronny.kirchenfuehrung.client.model.Tour
-import io.gitlab.jfronny.kirchenfuehrung.client.ui.ClientDestinations
+import io.gitlab.jfronny.kirchenfuehrung.client.ui.ClientNavigationActions
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.components.ClientSnackbarHost
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.components.pullrefresh.PullRefreshIndicator
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.components.pullrefresh.pullRefresh
@@ -63,7 +62,7 @@ import io.gitlab.jfronny.kirchenfuehrung.client.ui.rememberContentPaddingForScre
 fun OverviewRoute(
     overviewViewModel: OverviewViewModel,
     isExpandedScreen: Boolean,
-    navController: NavHostController,
+    navigation: ClientNavigationActions,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ) {
     val uiState by overviewViewModel.uiState.collectAsStateWithLifecycle()
@@ -73,7 +72,8 @@ fun OverviewRoute(
         isExpandedScreen = isExpandedScreen,
         onErrorDismiss = { overviewViewModel.errorShown(it) },
         onRefresh = { overviewViewModel.refreshTours() },
-        onSelectTour = { navController.navigate("${ClientDestinations.VIEWER}/$it") },
+        onSelectTour = { navigation.navigateToTour(it) },
+        onSelectAbout = { navigation.navigateToAbout() },
         snackbarHostState = snackbarHostState
     )
 }
@@ -86,6 +86,7 @@ fun OverviewRoute(
     onErrorDismiss: (Long) -> Unit,
     onRefresh: () -> Unit,
     onSelectTour: (String) -> Unit,
+    onSelectAbout: () -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
     val overviewListLazyListState = rememberLazyListState()
@@ -96,7 +97,7 @@ fun OverviewRoute(
         snackbarHost = { ClientSnackbarHost(hostState = snackbarHostState) },
         topBar = {
             if (showTopAppBar) {
-                OverviewTopAppBar(topAppBarState = topAppBarState)
+                OverviewTopAppBar(topAppBarState = topAppBarState, onSelectAbout = onSelectAbout)
             }
         },
         modifier = Modifier
@@ -155,7 +156,10 @@ fun OverviewRoute(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun OverviewTopAppBar(topAppBarState: TopAppBarState = rememberTopAppBarState()) {
+private fun OverviewTopAppBar(
+    topAppBarState: TopAppBarState = rememberTopAppBarState(),
+    onSelectAbout: () -> Unit
+) {
     val context = LocalContext.current
     val title = stringResource(id = R.string.app_name)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
@@ -170,9 +174,7 @@ private fun OverviewTopAppBar(topAppBarState: TopAppBarState = rememberTopAppBar
             )
         },
         actions = {
-            IconButton(onClick = {
-
-            }) {
+            IconButton(onClick = onSelectAbout) {
                 Icon(
                     imageVector = Icons.Filled.Info,
                     contentDescription = stringResource(R.string.about)

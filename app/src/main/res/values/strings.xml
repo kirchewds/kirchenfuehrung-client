@@ -3,4 +3,7 @@
     <string name="retry">Retry</string>
     <string name="about">About</string>
     <string name="load_error">Could not load tours</string>
+    <string name="about_author">Created by Johannes Frohnmeyer</string>
+    <string name="about_bugs">File a bug report</string>
+    <string name="about_code">Source Code</string>
 </resources>
