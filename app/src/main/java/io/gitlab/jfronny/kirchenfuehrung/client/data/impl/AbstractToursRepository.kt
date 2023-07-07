@@ -1,0 +1,14 @@
+package io.gitlab.jfronny.kirchenfuehrung.client.data.impl
+
+import io.gitlab.jfronny.kirchenfuehrung.client.data.ToursRepository
+import io.gitlab.jfronny.kirchenfuehrung.client.model.Tour
+
+abstract class AbstractToursRepository: ToursRepository {
+    override suspend fun getHighlighted(): Result<Tour> = getTours().map { it.highlight }
+    override suspend fun getSecondaryTours(): Result<Map<String, Tour>> = getTours().map { it.secondary }
+    override suspend fun getTour(id: String): Result<Tour> =
+        getAllTours().mapCatching { it[id] ?: throw IllegalArgumentException("Tour not found") }
+    private suspend fun getAllTours(): Result<Map<String, Tour>> = getTours()
+        .map { listOf(it.highlight.name to it.highlight) + it.secondary.toList() }
+        .map { it.toMap() }
+}
