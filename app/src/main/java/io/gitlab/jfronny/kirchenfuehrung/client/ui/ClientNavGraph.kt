@@ -2,6 +2,7 @@ package io.gitlab.jfronny.kirchenfuehrung.client.ui
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -28,12 +29,12 @@ fun ClientNavGraph(
     navController: NavHostController = rememberNavController(),
     startDestination: String = ClientDestinations.OVERVIEW
 ) {
+    val navigationActions = remember(navController) { ClientNavigationActions(navController) }
     NavHost(
         navController = navController,
         startDestination = startDestination,
         modifier = modifier
     ) {
-        val navigationActions = ClientNavigationActions(navController)
         composable(route = ClientDestinations.OVERVIEW) {
             val overviewViewModel: OverviewViewModel = viewModel(
                 factory = OverviewViewModel.provideFactory(

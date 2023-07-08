@@ -9,13 +9,10 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -23,19 +20,13 @@ import androidx.navigation.compose.rememberNavController
 import io.gitlab.jfronny.kirchenfuehrung.client.data.AppContainer
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.theme.ClientTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClientApp(appContainer: AppContainer, widthSizeClass: WindowWidthSizeClass) {
     ClientTheme {
         val navController = rememberNavController()
-        val navigationActions = remember(navController) {
-            ClientNavigationActions(navController)
-        }
-
-        val coroutineScope = rememberCoroutineScope()
 
         val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentRoute = navBackStackEntry?.destination?.route ?: ClientDestinations.OVERVIEW
+        navBackStackEntry?.destination?.route ?: ClientDestinations.OVERVIEW
 
         val isExpandedScreen = widthSizeClass == WindowWidthSizeClass.Expanded
         val sizeAwareDrawerState = rememberSizeAwareDrawerState(isExpandedScreen)
@@ -53,7 +44,6 @@ fun ClientApp(appContainer: AppContainer, widthSizeClass: WindowWidthSizeClass) 
 /**
  * Determine the drawer state to pass to the modal drawer.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun rememberSizeAwareDrawerState(isExpandedScreen: Boolean): DrawerState {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
