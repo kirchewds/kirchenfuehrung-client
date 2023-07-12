@@ -13,6 +13,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSource
@@ -94,7 +95,6 @@ class MediaPlaybackService: MediaLibraryService(), Player.Listener, MediaLibrary
             .build()
             .apply {
                 addListener(this@MediaPlaybackService)
-//                addAnalyticsListener(PlaybackStatsListener(false, this@MediaPlaybackService))
                 repeatMode = Player.REPEAT_MODE_OFF
             }
         mediaSession = MediaLibrarySession.Builder(this, player, this)
@@ -159,7 +159,6 @@ class MediaPlaybackService: MediaLibraryService(), Player.Listener, MediaLibrary
         player.clearMediaItems()
         player.setMediaItems(item.tracks.map { it.toMediaItem() })
         player.prepare()
-        player.play()
     }
 
     fun stop() {
@@ -176,7 +175,7 @@ class MediaPlaybackService: MediaLibraryService(), Player.Listener, MediaLibrary
         super.onDestroy()
     }
 
-    override fun onBind(intent: Intent?): IBinder? = super.onBind(intent) ?: binder
+    override fun onBind(intent: Intent?): IBinder = super.onBind(intent) ?: binder
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
@@ -204,6 +203,10 @@ class MediaPlaybackService: MediaLibraryService(), Player.Listener, MediaLibrary
     )
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo) = mediaSession
+
+    override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+        if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO) player.pause()
+    }
 
     inner class MusicBinder: Binder() {
         val service: MediaPlaybackService get() = this@MediaPlaybackService
