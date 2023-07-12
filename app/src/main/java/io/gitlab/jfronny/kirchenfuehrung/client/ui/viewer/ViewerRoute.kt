@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.C
 import androidx.media3.common.Player.STATE_ENDED
+import androidx.media3.common.Player.STATE_READY
 import coil.compose.AsyncImage
 import io.gitlab.jfronny.kirchenfuehrung.client.R
 import io.gitlab.jfronny.kirchenfuehrung.client.model.Track
@@ -69,6 +70,8 @@ import io.gitlab.jfronny.kirchenfuehrung.client.ui.components.pullrefresh.pullRe
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.components.pullrefresh.rememberPullRefreshState
 import io.gitlab.jfronny.kirchenfuehrung.client.util.makeTimeString
 import io.gitlab.jfronny.kirchenfuehrung.client.util.togglePlayPause
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runBlocking
 
 @Composable
@@ -278,6 +281,16 @@ fun ControlsContent(track: Track, playerConnection: PlayerConnection) {
     }
     var sliderPosition by remember {
         mutableStateOf<Long?>(null)
+    }
+
+    LaunchedEffect(playbackState) {
+        if (playbackState == STATE_READY) {
+            while (isActive) {
+                delay(500)
+                position = playerConnection.player.currentPosition
+                duration = playerConnection.player.duration
+            }
+        }
     }
 
     Slider(
