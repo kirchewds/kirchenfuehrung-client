@@ -62,7 +62,9 @@ object ToursParser {
         reader.endObject()
         if (name == null) throw IllegalStateException("Tour lacks name")
         if (tracks.isNullOrEmpty()) throw IllegalStateException("Tour lacks tracks")
-        return Tour(name, if (cover == null) null else Url(cover), tracks)
+        val tour = Tour(name, if (cover == null) null else Url(cover), tracks)
+        tracks.forEach { it.tour = tour }
+        return tour
     }
 
     private fun parseTracksArray(reader: JsonReader): List<Track> {

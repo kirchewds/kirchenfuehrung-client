@@ -1,3 +1,7 @@
 package io.gitlab.jfronny.kirchenfuehrung.client.model
 
-data class Tours(val highlight: Tour, val secondary: Map<String, Tour>)
+import androidx.compose.runtime.Immutable
+import java.io.Serializable
+
+@Immutable
+data class Tours(val highlight: Tour, val secondary: Map<String, Tour>): Serializable

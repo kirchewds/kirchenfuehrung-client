@@ -1,6 +1,5 @@
 package io.gitlab.jfronny.kirchenfuehrung.client.ui
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -13,7 +12,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import io.gitlab.jfronny.kirchenfuehrung.client.ClientApplication.Companion.TOUR_URI
-import io.gitlab.jfronny.kirchenfuehrung.client.data.AppContainer
+import io.gitlab.jfronny.kirchenfuehrung.client.data.ToursRepository
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.ClientDestinations.TOUR_ID
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.about.AboutRoute
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.overview.OverviewRoute
@@ -23,7 +22,7 @@ import io.gitlab.jfronny.kirchenfuehrung.client.ui.viewer.ViewerViewModel
 
 @Composable
 fun ClientNavGraph(
-    appContainer: AppContainer,
+    repository: ToursRepository,
     isExpandedScreen: Boolean,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
@@ -38,7 +37,7 @@ fun ClientNavGraph(
         composable(route = ClientDestinations.OVERVIEW) {
             val overviewViewModel: OverviewViewModel = viewModel(
                 factory = OverviewViewModel.provideFactory(
-                    toursRepository = appContainer.toursRepository
+                    toursRepository = repository
                 )
             )
             OverviewRoute(
@@ -61,7 +60,7 @@ fun ClientNavGraph(
         ) { navBackStackEntry ->
             val tourId = navBackStackEntry.arguments?.getString(TOUR_ID)
             val viewerViewModel: ViewerViewModel = viewModel(
-                factory = ViewerViewModel.provideFactory(appContainer.toursRepository, tourId)
+                factory = ViewerViewModel.provideFactory(repository, tourId)
             )
             ViewerRoute(
                 viewerViewModel = viewerViewModel,

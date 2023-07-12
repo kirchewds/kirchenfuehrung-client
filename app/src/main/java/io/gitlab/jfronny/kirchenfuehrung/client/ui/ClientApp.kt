@@ -17,11 +17,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import io.gitlab.jfronny.kirchenfuehrung.client.data.AppContainer
+import io.gitlab.jfronny.kirchenfuehrung.client.data.ToursRepository
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.theme.ClientTheme
 
 @Composable
-fun ClientApp(appContainer: AppContainer, widthSizeClass: WindowWidthSizeClass) {
+fun ClientApp(repository: ToursRepository, widthSizeClass: WindowWidthSizeClass) {
     ClientTheme {
         val navController = rememberNavController()
 
@@ -33,7 +33,7 @@ fun ClientApp(appContainer: AppContainer, widthSizeClass: WindowWidthSizeClass) 
         
         Row {
             ClientNavGraph(
-                appContainer = appContainer,
+                repository = repository,
                 isExpandedScreen = isExpandedScreen,
                 navController = navController
             )

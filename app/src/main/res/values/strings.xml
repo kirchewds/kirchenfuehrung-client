@@ -6,4 +6,11 @@
     <string name="about_author">Created by Johannes Frohnmeyer</string>
     <string name="about_bugs">File a bug report</string>
     <string name="about_code">Source Code</string>
+
+    <!-- Notification name -->
+    <string name="music_player">Music Player</string>
+    <string name="error_not_found">Track not found</string>
+    <string name="error_no_internet">No network connection</string>
+    <string name="error_timeout">Timeout</string>
+    <string name="error_unknown">Unknown error</string>
 </resources>

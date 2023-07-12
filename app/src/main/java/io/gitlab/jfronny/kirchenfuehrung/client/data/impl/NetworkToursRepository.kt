@@ -1,23 +1,20 @@
 package io.gitlab.jfronny.kirchenfuehrung.client.data.impl
 
 import io.gitlab.jfronny.commons.serialize.gson.api.v1.GsonHolders
-import io.gitlab.jfronny.kirchenfuehrung.client.data.ToursRepository
-import io.gitlab.jfronny.kirchenfuehrung.client.model.Tour
 import io.gitlab.jfronny.kirchenfuehrung.client.model.Tours
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
+import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.request.get
 import io.ktor.http.Url
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import java.io.Reader
 import java.io.StringReader
 
 class NetworkToursRepository(private val toursJsonUrl: Url): AbstractToursRepository() {
     private val gson = GsonHolders.API.modifyBuilder { it.serializeNulls() }.gson
-    private val client = HttpClient(CIO)
+    private val client = HttpClient(OkHttp)
     private val mutex = Mutex()
     private var tours: Tours? = null
 
