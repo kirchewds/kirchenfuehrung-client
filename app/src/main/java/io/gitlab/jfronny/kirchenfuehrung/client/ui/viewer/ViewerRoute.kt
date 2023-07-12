@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -29,10 +30,12 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,8 +52,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.C
 import androidx.media3.common.Player.STATE_ENDED
@@ -66,7 +72,6 @@ import io.gitlab.jfronny.kirchenfuehrung.client.ui.components.pullrefresh.PullRe
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.components.pullrefresh.pullRefresh
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.components.pullrefresh.rememberPullRefreshState
 import io.gitlab.jfronny.kirchenfuehrung.client.util.makeTimeString
-import io.gitlab.jfronny.kirchenfuehrung.client.util.togglePlayPause
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 
@@ -220,21 +225,6 @@ fun PhonePlayer(track: Track, playerConnection: PlayerConnection) {
 
         Spacer(Modifier.height(24.dp))
     }
-//    Column {
-//        AsyncImage(
-//            model = track.image.toString(),
-//            contentDescription = null,
-//            contentScale = ContentScale.Fit,
-//            modifier = Modifier
-//                .heightIn(max = 360.dp)
-//                .fillMaxWidth()
-//                .clip(shape = MaterialTheme.shapes.medium)
-//        )
-//        LinearProgressIndicator(
-//            progress = (position.toFloat() / duration).coerceIn(0f, 1f)
-//        )
-//        Text(text = track.name)
-//    }
 }
 
 @Composable
@@ -244,8 +234,6 @@ fun Thumbnail(track: Track) {
         contentDescription = null,
         contentScale = ContentScale.Fit,
         modifier = Modifier
-//                    .heightIn(max = 360.dp)
-//                    .fillMaxWidth()
             .clip(RoundedCornerShape(6.dp))
     )
 }
@@ -277,6 +265,9 @@ fun ControlsContent(track: Track, playerConnection: PlayerConnection) {
     }
     var sliderPosition by remember {
         mutableStateOf<Long?>(null)
+    }
+    var showHeadphonesScreen = rememberSaveable(playbackState) {
+        mutableStateOf(false)
     }
 
     LaunchedEffect(playbackState) {
@@ -355,10 +346,17 @@ fun ControlsContent(track: Track, playerConnection: PlayerConnection) {
                 .background(MaterialTheme.colorScheme.secondaryContainer)
                 .clickable {
                     if (playbackState == STATE_ENDED) {
-                        playerConnection.player.seekTo(0, 0)
-                        playerConnection.player.playWhenReady = true
+                        playerConnection.player.run {
+                            seekTo(0, 0)
+                            if (playerConnection.isUsingHeadphones) playWhenReady = true
+                            else showHeadphonesScreen.value = true
+                        }
                     } else {
-                        playerConnection.player.togglePlayPause()
+                        playerConnection.player.run {
+                            if (playWhenReady) playWhenReady = false
+                            else if (playerConnection.isUsingHeadphones) playWhenReady = true
+                            else showHeadphonesScreen.value = true
+                        }
                     }
                 }
         ) {
@@ -383,6 +381,96 @@ fun ControlsContent(track: Track, playerConnection: PlayerConnection) {
                     .align(Alignment.Center),
                 onClick = playerConnection.player::seekToNext
             )
+        }
+    }
+
+    if (showHeadphonesScreen.value) {
+        HeadphonesDialog(showHeadphonesScreen, playerConnection)
+    }
+}
+
+@Composable
+fun HeadphonesDialog(showHeadphonesScreen: MutableState<Boolean>, playerConnection: PlayerConnection, modifier: Modifier = Modifier) {
+    Dialog(
+        onDismissRequest = { showHeadphonesScreen.value = false },
+        properties = DialogProperties(dismissOnClickOutside = false)
+    ) {
+        Card(
+            shape = RoundedCornerShape(10.dp),
+            modifier = Modifier.padding(10.dp, 5.dp, 10.dp, 10.dp)
+            //TODO elevation
+        ) {
+            Column {
+                //.......................................................................
+                Image(
+                    painter = painterResource(id = R.drawable.headset),
+                    contentDescription = null, // decorative
+                    contentScale = ContentScale.Fit,
+                    colorFilter  = ColorFilter.tint(
+                        color = MaterialTheme.colorScheme.primary
+                    ),
+                    modifier = Modifier
+                        .padding(top = 35.dp)
+                        .height(70.dp)
+                        .fillMaxWidth(),
+
+                    )
+
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = stringResource(R.string.headphones_title),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(top = 5.dp)
+                            .fillMaxWidth(),
+                        style = MaterialTheme.typography.labelLarge,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = stringResource(R.string.headphones_description),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(top = 10.dp, start = 25.dp, end = 25.dp)
+                            .fillMaxWidth(),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+                //.......................................................................
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp)
+                        .background(MaterialTheme.colorScheme.secondaryContainer),
+                    horizontalArrangement = Arrangement.SpaceAround) {
+
+                    TextButton(onClick = {
+                        showHeadphonesScreen.value = false
+                        playerConnection.player.playWhenReady = true
+                    }) {
+
+                        Text(
+                            stringResource(R.string.headphones_not_now),
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.padding(top = 5.dp, bottom = 5.dp)
+                        )
+                    }
+                    TextButton(onClick = {
+                        if (playerConnection.isUsingHeadphones) {
+                            showHeadphonesScreen.value = false
+                            playerConnection.player.playWhenReady = true
+                        }
+                    }) {
+                        Text(
+                            stringResource(R.string.headphones_check_again),
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(top = 5.dp, bottom = 5.dp)
+                        )
+                    }
+                }
+            }
         }
     }
 }

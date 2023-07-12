@@ -1,11 +1,18 @@
 package io.gitlab.jfronny.kirchenfuehrung.client.playback
 
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
-import android.net.ConnectivityManager
+import android.content.IntentFilter
+import android.media.AudioDeviceInfo
+import android.media.AudioManager
 import android.net.Uri
 import android.os.Binder
+import android.os.Build
 import android.os.IBinder
+import androidx.annotation.OptIn
+import androidx.annotation.RequiresApi
 import androidx.core.content.getSystemService
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
@@ -50,24 +57,34 @@ import java.net.ConnectException
 import java.net.SocketException
 import java.net.UnknownHostException
 import javax.inject.Inject
-import androidx.annotation.OptIn as OptInX
 
-@OptInX(UnstableApi::class)
+@OptIn(UnstableApi::class)
 @AndroidEntryPoint
 class MediaPlaybackService: MediaLibraryService(), Player.Listener, MediaLibraryService.MediaLibrarySession.Callback {
     @Inject lateinit var toursRepository: ToursRepository
     @Inject lateinit var playerCache: SimpleCache
 
     private val scope = CoroutineScope(Dispatchers.Main) + Job()
-    private lateinit var connectivityManager: ConnectivityManager
     lateinit var player: ExoPlayer
     private lateinit var mediaSession: MediaLibrarySession
     private var binder = MusicBinder()
+    private lateinit var audioManager: AudioManager
 
     val currentMediaMetadata = MutableStateFlow<Track?>(null)
     private var currentTrack: Track? = null
 
-    @OptInX(UnstableApi::class)
+    private val headsetStateReceiver = object: BroadcastReceiver() {
+        val supportedActions = arrayOf(
+            Intent.ACTION_HEADSET_PLUG,
+            "android.bluetooth.headset.action.STATE_CHANGED",
+            "android.bluetooth.headset.profile.action.CONNECTION_STATE_CHANGED"
+        )
+
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action in supportedActions) updateDevices()
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         setMediaNotificationProvider(
@@ -104,17 +121,64 @@ class MediaPlaybackService: MediaLibraryService(), Player.Listener, MediaLibrary
             )
             .setBitmapLoader(CoilBitmapLoader(this, scope))
             .build()
-        connectivityManager = getSystemService()!!
+
+        audioManager = applicationContext.getSystemService()!!
+        registerReceiver(headsetStateReceiver, IntentFilter().apply {
+            headsetStateReceiver.supportedActions.forEach { addAction(it) }
+        })
 
         currentMediaMetadata.collect(scope) {
             currentTrack = it
         }
     }
 
+    private val supportedTypes by lazy {
+        val list = HashMap<Int, Int>()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        list[AudioDeviceInfo.TYPE_BLE_HEADSET] = 2
+                    }
+                    list[AudioDeviceInfo.TYPE_HEARING_AID] = 2
+                }
+                list[AudioDeviceInfo.TYPE_USB_HEADSET] = 3
+            }
+            list[AudioDeviceInfo.TYPE_AUX_LINE] = 1
+            list[AudioDeviceInfo.TYPE_WIRED_HEADSET] = 3
+            list[AudioDeviceInfo.TYPE_WIRED_HEADPHONES] = 3
+            // For bluetooth audio - probably not a box
+            list[AudioDeviceInfo.TYPE_BLUETOOTH_A2DP] = 1
+            list[AudioDeviceInfo.TYPE_BLUETOOTH_SCO] = 1
+        }
+        list
+    }
+
+    private val supportedDevices @RequiresApi(Build.VERSION_CODES.M)
+    get() = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS).filter { it.type in supportedTypes.keys }
+
+    private fun updateDevices() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return
+        if (supportedDevices.isNotEmpty()) {
+            player.setPreferredAudioDevice(
+                this.supportedDevices
+                    .groupBy { supportedTypes[it.type] }
+                    .maxBy { it.key!! }
+                    .value[0]
+            )
+        }
+    }
+
+    val isUsingHeadphones: Boolean get() =
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) audioManager.isWiredHeadsetOn
+        else {
+            updateDevices()
+            supportedDevices.isNotEmpty()
+        }
+
     private fun createOkHttpDataSourceFactory() =
         OkHttpDataSource.Factory(OkHttpClient.Builder().build())
 
-    @OptInX(UnstableApi::class)
     private fun createCacheDataSource(): CacheDataSource.Factory =
         CacheDataSource.Factory()
         .setCache(playerCache)
@@ -162,12 +226,12 @@ class MediaPlaybackService: MediaLibraryService(), Player.Listener, MediaLibrary
         player.clearMediaItems()
     }
 
-    @OptInX(UnstableApi::class)
     override fun onDestroy() {
         mediaSession.release()
         player.removeListener(this)
         player.release()
         playerCache.release()
+        unregisterReceiver(headsetStateReceiver)
         super.onDestroy()
     }
 

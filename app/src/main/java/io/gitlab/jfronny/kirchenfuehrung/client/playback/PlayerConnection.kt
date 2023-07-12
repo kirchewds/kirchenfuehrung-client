@@ -49,6 +49,7 @@ class PlayerConnection(
 
     fun play(item: Tour) = service.play(item)
     fun stop() = service.stop()
+    val isUsingHeadphones get() = service.isUsingHeadphones
 
     override fun onPlaybackStateChanged(state: Int) {
         playbackState.value = state
