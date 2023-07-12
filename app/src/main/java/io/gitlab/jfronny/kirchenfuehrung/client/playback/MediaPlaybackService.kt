@@ -3,17 +3,16 @@ package io.gitlab.jfronny.kirchenfuehrung.client.playback
 import android.app.PendingIntent
 import android.content.Intent
 import android.net.ConnectivityManager
+import android.net.Uri
 import android.os.Binder
 import android.os.IBinder
 import androidx.core.content.getSystemService
-import androidx.core.net.toUri
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
-import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSource
@@ -40,7 +39,6 @@ import io.gitlab.jfronny.kirchenfuehrung.client.model.Track
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.MainActivity
 import io.gitlab.jfronny.kirchenfuehrung.client.util.CoilBitmapLoader
 import io.gitlab.jfronny.kirchenfuehrung.client.util.collect
-import io.ktor.http.Url
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -65,8 +63,6 @@ class MediaPlaybackService: MediaLibraryService(), Player.Listener, MediaLibrary
     lateinit var player: ExoPlayer
     private lateinit var mediaSession: MediaLibrarySession
     private var binder = MusicBinder()
-
-    private var currentTour: Tour? = null
 
     val currentMediaMetadata = MutableStateFlow<Track?>(null)
     private var currentTrack: Track? = null
@@ -125,12 +121,12 @@ class MediaPlaybackService: MediaLibraryService(), Player.Listener, MediaLibrary
         .setUpstreamDataSourceFactory(DefaultDataSource.Factory(this, createOkHttpDataSourceFactory()))
 
     private fun createDataSourceFactory(): DataSource.Factory {
-        val trackUrlCache = HashMap<String, Url>()
+        val trackUrlCache = HashMap<String, Uri>()
         return ResolvingDataSource.Factory(createCacheDataSource()) { dataSpec ->
             val mediaId = dataSpec.key ?: error("No media id")
 
             trackUrlCache[mediaId]?.let {
-                return@Factory dataSpec.withUri(it.toString().toUri())
+                return@Factory dataSpec.withUri(it)
             }
 
             val track = runBlocking(Dispatchers.IO) {
@@ -145,7 +141,7 @@ class MediaPlaybackService: MediaLibraryService(), Player.Listener, MediaLibrary
             }
             trackUrlCache[mediaId] = track.audio
 
-            dataSpec.withUri(track.audio.toString().toUri()).subrange(dataSpec.uriPositionOffset, CHUNK_LENGTH)
+            dataSpec.withUri(track.audio).subrange(dataSpec.uriPositionOffset, CHUNK_LENGTH)
         }
     }
 

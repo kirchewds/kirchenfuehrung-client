@@ -81,8 +81,7 @@ abstract class StripCommonsClassVisitorFactory: AsmClassVisitorFactory<StripComm
 dependencies {
     // API
     implementation("io.gitlab.jfronny:commons-gson:1.3-SNAPSHOT")
-    implementation("io.ktor:ktor-client-core:1.6.4")
-    implementation("io.ktor:ktor-client-okhttp:1.6.4")
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
     // Images
     implementation("io.coil-kt:coil-compose:2.4.0")
     // Audio

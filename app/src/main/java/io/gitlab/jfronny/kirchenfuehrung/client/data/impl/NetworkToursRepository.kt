@@ -2,19 +2,24 @@ package io.gitlab.jfronny.kirchenfuehrung.client.data.impl
 
 import io.gitlab.jfronny.commons.serialize.gson.api.v1.GsonHolders
 import io.gitlab.jfronny.kirchenfuehrung.client.model.Tours
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.request.get
-import io.ktor.http.Url
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import java.io.StringReader
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import java.io.IOException
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
-class NetworkToursRepository(private val toursJsonUrl: Url): AbstractToursRepository() {
+class NetworkToursRepository(private val toursJsonUrl: HttpUrl): AbstractToursRepository() {
     private val gson = GsonHolders.API.modifyBuilder { it.serializeNulls() }.gson
-    private val client = HttpClient(OkHttp)
+    private val client = OkHttpClient()
     private val mutex = Mutex()
     private var tours: Tours? = null
 
@@ -22,16 +27,40 @@ class NetworkToursRepository(private val toursJsonUrl: Url): AbstractToursReposi
         if (tours != null) Result.success(tours!!)
         else withContext(Dispatchers.IO) {
             try {
-                StringReader(client.get<String>(toursJsonUrl)).use {
-                    gson.newJsonReader(it).use {
-                        val t = ToursParser.parseTours(it)
-                        if (t.isSuccess) tours = t.getOrThrow()
-                        t
+                val response = client.execute(Request.Builder().url(toursJsonUrl).build())
+                if (!response.isSuccessful) throw IOException("Unexpected code: $response")
+                response.body!!.byteStream().use {
+                    it.reader().use {
+                        gson.newJsonReader(it).use {
+                            val t = ToursParser.parseTours(it)
+                            if (t.isSuccess) tours = t.getOrThrow()
+                            t
+                        }
                     }
                 }
             } catch (e: Throwable) {
                 Result.failure(e)
             }
+        }
+    }
+
+    private suspend fun OkHttpClient.execute(request: Request): Response = suspendCancellableCoroutine { continuation ->
+        val call = newCall(request)
+
+        call.enqueue(object: Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                if (continuation.isCancelled) return
+                continuation.resumeWithException(e)
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                if (call.isCanceled()) return
+                continuation.resume(response)
+            }
+        })
+
+        continuation.invokeOnCancellation {
+            call.cancel()
         }
     }
 }

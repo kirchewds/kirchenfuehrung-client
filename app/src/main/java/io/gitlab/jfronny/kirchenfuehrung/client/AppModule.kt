@@ -13,7 +13,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.gitlab.jfronny.kirchenfuehrung.client.data.ToursRepository
 import io.gitlab.jfronny.kirchenfuehrung.client.data.impl.NetworkToursRepository
-import io.ktor.http.Url
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import javax.inject.Singleton
 
 @Module
@@ -22,7 +22,7 @@ object AppModule {
     @Singleton
     @Provides
     fun provideRepository(@ApplicationContext context: Context): ToursRepository =
-        NetworkToursRepository(Url(ClientApplication.TOURS_JSON_URI))
+        NetworkToursRepository(ClientApplication.TOURS_JSON_URI.toHttpUrl())
 
     @Singleton
     @Provides

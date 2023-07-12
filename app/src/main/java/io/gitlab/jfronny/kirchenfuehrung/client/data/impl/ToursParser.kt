@@ -1,11 +1,11 @@
 package io.gitlab.jfronny.kirchenfuehrung.client.data.impl
 
+import androidx.core.net.toUri
 import io.gitlab.jfronny.gson.stream.JsonReader
 import io.gitlab.jfronny.gson.stream.JsonToken
 import io.gitlab.jfronny.kirchenfuehrung.client.model.Tour
 import io.gitlab.jfronny.kirchenfuehrung.client.model.Tours
 import io.gitlab.jfronny.kirchenfuehrung.client.model.Track
-import io.ktor.http.Url
 
 object ToursParser {
     fun parseTours(reader: JsonReader): Result<Tours> {
@@ -62,7 +62,7 @@ object ToursParser {
         reader.endObject()
         if (name == null) throw IllegalStateException("Tour lacks name")
         if (tracks.isNullOrEmpty()) throw IllegalStateException("Tour lacks tracks")
-        val tour = Tour(name, if (cover == null) null else Url(cover), tracks)
+        val tour = Tour(name, cover, tracks)
         tracks.forEach { it.tour = tour }
         return tour
     }
@@ -94,6 +94,6 @@ object ToursParser {
         if (name == null) throw IllegalStateException("Track lacks name")
         if (image == null) throw IllegalStateException("Track lacks image")
         if (audio == null) throw IllegalStateException("Track lacks audio")
-        return Track(name, Url(image), Url(audio))
+        return Track(name, image.toUri(), audio.toUri())
     }
 }

@@ -8,11 +8,10 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.MediaMetadata.MEDIA_TYPE_MUSIC
 import androidx.media3.common.util.UnstableApi
 import io.gitlab.jfronny.kirchenfuehrung.client.ClientApplication
-import io.ktor.http.Url
 import java.io.Serializable
 
 @Immutable
-data class Track(val name: String, val image: Url, val audio: Url): Serializable {
+data class Track(val name: String, val image: Uri, val audio: Uri): Serializable {
     lateinit var tour: Tour
 
     val id: String get() = "${ClientApplication.TOUR_URI}${tour.name}/$name"
@@ -27,7 +26,7 @@ data class Track(val name: String, val image: Url, val audio: Url): Serializable
             MediaMetadata.Builder()
                 .setTitle(name)
                 .setAlbumTitle(tour.name)
-                .setArtworkUri(Uri.parse(image.toString()))
+                .setArtworkUri(image)
                 .setMediaType(MEDIA_TYPE_MUSIC)
                 .build()
         )
