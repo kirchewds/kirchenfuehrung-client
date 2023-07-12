@@ -97,3 +97,4 @@ class ViewerViewModel(
 }
 
 val LocalPlayerConnection = staticCompositionLocalOf<PlayerConnection?> { error("No PlayerConnection provided") }
+var skipHeadphonesDialog = false // Yes, this is global mutable state. No, I will not change it.

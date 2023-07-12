@@ -266,7 +266,7 @@ fun ControlsContent(track: Track, playerConnection: PlayerConnection) {
     var sliderPosition by remember {
         mutableStateOf<Long?>(null)
     }
-    var showHeadphonesScreen = rememberSaveable(playbackState) {
+    val showHeadphonesScreen = rememberSaveable(playbackState) {
         mutableStateOf(false)
     }
 
@@ -348,13 +348,13 @@ fun ControlsContent(track: Track, playerConnection: PlayerConnection) {
                     if (playbackState == STATE_ENDED) {
                         playerConnection.player.run {
                             seekTo(0, 0)
-                            if (playerConnection.isUsingHeadphones) playWhenReady = true
+                            if (skipHeadphonesDialog || playerConnection.isUsingHeadphones) playWhenReady = true
                             else showHeadphonesScreen.value = true
                         }
                     } else {
                         playerConnection.player.run {
                             if (playWhenReady) playWhenReady = false
-                            else if (playerConnection.isUsingHeadphones) playWhenReady = true
+                            else if (skipHeadphonesDialog || playerConnection.isUsingHeadphones) playWhenReady = true
                             else showHeadphonesScreen.value = true
                         }
                     }
@@ -444,6 +444,7 @@ fun HeadphonesDialog(showHeadphonesScreen: MutableState<Boolean>, playerConnecti
                     horizontalArrangement = Arrangement.SpaceAround) {
 
                     TextButton(onClick = {
+                        skipHeadphonesDialog = true
                         showHeadphonesScreen.value = false
                         playerConnection.player.playWhenReady = true
                     }) {
