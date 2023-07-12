@@ -108,7 +108,7 @@ fun ViewerRoute(
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
 
-    var initial by remember { mutableStateOf(true) }
+    var initial by rememberSaveable { mutableStateOf(true) }
 
     BackHandler {
         playerConnection.stop()
