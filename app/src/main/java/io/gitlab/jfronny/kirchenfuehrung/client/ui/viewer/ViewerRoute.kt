@@ -398,7 +398,6 @@ fun HeadphonesDialog(showHeadphonesScreen: MutableState<Boolean>, playerConnecti
         Card(
             shape = RoundedCornerShape(10.dp),
             modifier = Modifier.padding(10.dp, 5.dp, 10.dp, 10.dp)
-            //TODO elevation
         ) {
             Column {
                 //.......................................................................
