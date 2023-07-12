@@ -105,10 +105,9 @@ fun ViewerRoute(
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
 
-    var dismissed by remember { mutableStateOf(false) }
+    var initial by remember { mutableStateOf(true) }
 
     BackHandler {
-        dismissed = true
         playerConnection.stop()
         onBack()
     }
@@ -121,7 +120,10 @@ fun ViewerRoute(
             .padding(innerPadding)
             .nestedScroll(scrollBehavior.nestedScrollConnection)
 
-        val pullRefreshState = rememberPullRefreshState(refreshing = uiState is ViewerUiState.Loading, onRefresh = onRefresh)
+        val pullRefreshState = rememberPullRefreshState(refreshing = uiState is ViewerUiState.Loading, onRefresh = {
+            initial = true
+            onRefresh()
+        })
 
         Box(modifier = Modifier
             .padding(innerPadding)
@@ -129,7 +131,10 @@ fun ViewerRoute(
             .pullRefresh(pullRefreshState)) {
             when (uiState) {
                 is ViewerUiState.Play -> {
-                    if (!dismissed) playerConnection.play(uiState.tour)
+                    if (initial) {
+                        initial = false
+                        playerConnection.play(uiState.tour)
+                    }
                     if (currentTrack == null) {
                         Box(contentModifier.fillMaxSize())
                     } else {
@@ -138,6 +143,7 @@ fun ViewerRoute(
                     }
                 }
                 is ViewerUiState.Error -> {
+                    initial = true
                     playerConnection.stop()
                     Box(contentModifier.fillMaxSize()) {}
                     val errorMessage = remember(uiState) { uiState.errorMessages[0] }
@@ -160,6 +166,7 @@ fun ViewerRoute(
                     }
                 }
                 ViewerUiState.Loading -> {
+                    initial = true
                     playerConnection.stop()
                     Box(contentModifier.fillMaxSize())
                 }
