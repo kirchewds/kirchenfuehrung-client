@@ -41,4 +41,8 @@ class ClientNavigationActions(private val navController: NavHostController) {
             restoreState = true
         }
     }
+
+    fun navigateBack() {
+        navController.popBackStack()
+    }
 }

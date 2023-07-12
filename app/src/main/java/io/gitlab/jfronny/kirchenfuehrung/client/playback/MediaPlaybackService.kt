@@ -18,14 +18,9 @@ import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.ResolvingDataSource
 import androidx.media3.datasource.cache.CacheDataSource
-import androidx.media3.datasource.cache.CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR
 import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.RenderersFactory
-import androidx.media3.exoplayer.analytics.AnalyticsListener
-import androidx.media3.exoplayer.analytics.PlaybackStats
-import androidx.media3.exoplayer.analytics.PlaybackStatsListener
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.extractor.ExtractorsFactory
@@ -34,7 +29,6 @@ import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.LibraryResult
 import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaSession
-import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import dagger.hilt.android.AndroidEntryPoint
@@ -48,25 +42,16 @@ import io.gitlab.jfronny.kirchenfuehrung.client.util.collect
 import io.ktor.http.Url
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.guava.future
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
-import java.lang.NullPointerException
 import java.net.ConnectException
 import java.net.SocketException
 import java.net.UnknownHostException
 import javax.inject.Inject
 import androidx.annotation.OptIn as OptInX
-import kotlin.OptIn as OptInK
-
-private const val MEDIA_ROOT_ID = "/"
 
 @OptInX(UnstableApi::class)
 @AndroidEntryPoint
@@ -174,6 +159,12 @@ class MediaPlaybackService: MediaLibraryService(), Player.Listener, MediaLibrary
         player.clearMediaItems()
         player.setMediaItems(item.tracks.map { it.toMediaItem() })
         player.prepare()
+        player.play()
+    }
+
+    fun stop() {
+        player.stop()
+        player.clearMediaItems()
     }
 
     @OptInX(UnstableApi::class)
@@ -211,8 +202,6 @@ class MediaPlaybackService: MediaLibraryService(), Player.Listener, MediaLibrary
             params
         )
     )
-
-    //TODO onGetChildren, onGetItem
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo) = mediaSession
 

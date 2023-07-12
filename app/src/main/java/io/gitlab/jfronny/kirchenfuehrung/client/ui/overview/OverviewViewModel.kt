@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 sealed interface OverviewUiState {
     object Loading: OverviewUiState
@@ -69,10 +68,10 @@ class OverviewViewModel(
                     )
                 }, onFailure = {
                     Log.e("OverviewViewModel", "Could not load tours", it)
-                    state.copy(errorMessages = state.errorMessages + ErrorMessage(
-                        id = UUID.randomUUID().mostSignificantBits,
-                        messageId = R.string.load_error
-                    ), isLoading = false)
+                    state.copy(
+                        errorMessages = state.errorMessages + ErrorMessage(R.string.error_tours_load),
+                        isLoading = false
+                    )
                 })
             }
         }

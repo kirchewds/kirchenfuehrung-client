@@ -3,6 +3,9 @@ package io.gitlab.jfronny.kirchenfuehrung.client.playback
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.Player.COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM
+import androidx.media3.common.Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM
+import androidx.media3.common.Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM
 import androidx.media3.common.Player.STATE_ENDED
 import androidx.media3.common.Timeline
 import io.gitlab.jfronny.kirchenfuehrung.client.model.Tour
@@ -30,6 +33,9 @@ class PlayerConnection(
 
     val currentMediaItemIndex = MutableStateFlow(-1)
 
+    val canSkipPrevious = MutableStateFlow(true)
+    val canSkipNext = MutableStateFlow(true)
+
     val error = MutableStateFlow<PlaybackException?>(null)
 
     init {
@@ -42,6 +48,7 @@ class PlayerConnection(
     }
 
     fun play(item: Tour) = service.play(item)
+    fun stop() = service.stop()
 
     override fun onPlaybackStateChanged(state: Int) {
         playbackState.value = state
@@ -55,14 +62,40 @@ class PlayerConnection(
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
         currentTrack.value = mediaItem?.metadata
         currentMediaItemIndex.value = player.currentMediaItemIndex
+        updateCanSkipPreviousAndNext()
     }
 
     override fun onTimelineChanged(timeline: Timeline, reason: Int) {
         currentMediaItemIndex.value = player.currentMediaItemIndex
+        updateCanSkipPreviousAndNext()
+    }
+
+    override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
+        super.onShuffleModeEnabledChanged(shuffleModeEnabled)
+        updateCanSkipPreviousAndNext()
+    }
+
+    override fun onRepeatModeChanged(repeatMode: Int) {
+        super.onRepeatModeChanged(repeatMode)
+        updateCanSkipPreviousAndNext()
     }
 
     override fun onPlayerErrorChanged(playbackError: PlaybackException?) {
         error.value = playbackError
+    }
+
+    private fun updateCanSkipPreviousAndNext() {
+        if (!player.currentTimeline.isEmpty) {
+            val window = player.currentTimeline.getWindow(player.currentMediaItemIndex, Timeline.Window())
+            canSkipPrevious.value = player.isCommandAvailable(COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM)
+                    || !window.isLive()
+                    || player.isCommandAvailable(COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM)
+            canSkipNext.value = window.isLive() && window.isDynamic
+                    || player.isCommandAvailable(COMMAND_SEEK_TO_NEXT_MEDIA_ITEM)
+        } else {
+            canSkipPrevious.value = false
+            canSkipNext.value = false
+        }
     }
 
     fun dispose() {
