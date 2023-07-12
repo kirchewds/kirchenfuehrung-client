@@ -239,7 +239,8 @@ fun TourCardSimple(
 ) {
     Row(
         modifier = Modifier
-            .clickable(onClick = { navigateToTour(tour.name) })
+            .clickable(onClick = { navigateToTour(tour.name) }),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         TourImage(tour, Modifier
             .padding(16.dp)
