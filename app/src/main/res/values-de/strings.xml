@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Client</string>
+    <string name="retry">Wiederholen</string>
+    <string name="about">Über</string>
+    <string name="about_author">Erstellt von Johannes Frohnmeyer</string>
+    <string name="about_bugs">Fehler melden</string>
+    <string name="about_code">Quelltext</string>
+    <string name="music_player">Musik-Player</string>
+    <string name="error_tours_load">Konnte Touren nicht laden</string>
+    <string name="error_tour_load">Konnte Tour nicht laden</string>
+    <string name="error_not_found">Kapitel nicht gefunden</string>
+    <string name="error_no_internet">Keine Netzwerkverbindung</string>
+    <string name="error_timeout">Zeitüberschreitung</string>
+    <string name="error_unknown">Unbekannter Fehler</string>
+    <string name="headphones_title">Verwende Kopfhörer</string>
+    <string name="headphones_description">Bitte benutze Kopfhörer, um andere Besucher nicht zu stören</string>
+    <string name="headphones_not_now">Jetzt nicht</string>
+    <string name="headphones_check_again">Überprüfe erneut</string>
+</resources>

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Client</string>
+    <string name="app_name">Church Tour</string>
     <string name="retry">Retry</string>
     <string name="about">About</string>
     <string name="about_author">Created by Johannes Frohnmeyer</string>
@@ -17,6 +17,6 @@
     <string name="error_unknown">Unknown error</string>
     <string name="headphones_title">Use headphones</string>
     <string name="headphones_description">Please use headphones to not disturb other visitors.</string>
-    <string name="headphones_not_now">Not Now</string>
+    <string name="headphones_not_now">Not now</string>
     <string name="headphones_check_again">Check again</string>
 </resources>

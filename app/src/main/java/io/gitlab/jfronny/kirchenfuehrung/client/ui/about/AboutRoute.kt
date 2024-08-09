@@ -1,5 +1,6 @@
 package io.gitlab.jfronny.kirchenfuehrung.client.ui.about
 
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,10 +30,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import io.gitlab.jfronny.kirchenfuehrung.client.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,14 +66,15 @@ fun AboutRoute() {
                     },
                     url = "https://jfronny.gitlab.io/contact.html"
                 )
-                LinkTile(
+                MailTile(
                     icon = {
                         Icon(Icons.Default.BugReport, null)
                     },
                     title = {
                         Text(stringResource(R.string.about_bugs))
                     },
-                    url = "" //TODO fill in
+                    address = "contact-project+kirchewds-kirchenfuehrung-client-60715858-issue-@incoming.gitlab.com",
+                    subject = "Bug report"
                 )
                 LinkTile(
                     icon = {
@@ -79,15 +83,13 @@ fun AboutRoute() {
                     title = {
                         Text(stringResource(R.string.about_code))
                     },
-                    url = "" //TODO fill in
+                    url = "https://gitlab.com/kirchewds/kirchenfuehrung-client"
                 )
-                //TODO more details about who made this
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LinkTile(
     icon: @Composable () -> Unit,
@@ -108,6 +110,33 @@ fun LinkTile(
             leadingContent = { icon() },
             headlineContent = { title() },
             supportingContent = { Text(url) }
+        )
+    }
+}
+
+@Composable
+fun MailTile(
+    icon: @Composable () -> Unit,
+    title: @Composable () -> Unit,
+    address: String,
+    subject: String
+) {
+    val context = LocalContext.current
+    Card(
+//        colors = SettingsTileDefaults.cardColors(),
+        onClick = {
+            context.startActivity(Intent(Intent.ACTION_SENDTO).apply {
+                data = "mailto:".toUri()
+                putExtra(Intent.EXTRA_EMAIL, arrayOf(address))
+                putExtra(Intent.EXTRA_SUBJECT, subject)
+            })
+        }
+    ) {
+        ListItem(
+//            colors = SettingsTileDefaults.listItemColors(),
+            leadingContent = { icon() },
+            headlineContent = { title() },
+            supportingContent = { Text(address) }
         )
     }
 }
