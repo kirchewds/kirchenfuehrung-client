@@ -33,8 +33,8 @@ class PlayerConnection(
 
     val currentMediaItemIndex = MutableStateFlow(-1)
 
-    val canSkipPrevious = MutableStateFlow(true)
-    val canSkipNext = MutableStateFlow(true)
+    val isInitialTrack = MutableStateFlow(true)
+    val isFinalTrack = MutableStateFlow(true)
 
     val error = MutableStateFlow<PlaybackException?>(null)
 
@@ -88,14 +88,14 @@ class PlayerConnection(
     private fun updateCanSkipPreviousAndNext() {
         if (!player.currentTimeline.isEmpty) {
             val window = player.currentTimeline.getWindow(player.currentMediaItemIndex, Timeline.Window())
-            canSkipPrevious.value = player.isCommandAvailable(COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM)
-                    || !window.isLive()
-                    || player.isCommandAvailable(COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM)
-            canSkipNext.value = window.isLive() && window.isDynamic
-                    || player.isCommandAvailable(COMMAND_SEEK_TO_NEXT_MEDIA_ITEM)
+            isInitialTrack.value = !(player.isCommandAvailable(COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM)
+                    || !window.isLive
+                    || player.isCommandAvailable(COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM))
+            isFinalTrack.value = !(window.isLive && window.isDynamic
+                    || player.isCommandAvailable(COMMAND_SEEK_TO_NEXT_MEDIA_ITEM))
         } else {
-            canSkipPrevious.value = false
-            canSkipNext.value = false
+            isInitialTrack.value = true
+            isFinalTrack.value = true
         }
     }
 

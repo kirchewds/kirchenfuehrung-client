@@ -1,7 +1,11 @@
 package io.gitlab.jfronny.kirchenfuehrung.client.ui
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import io.gitlab.jfronny.kirchenfuehrung.client.model.Cookie
 
 object ClientDestinations {
     const val OVERVIEW = "overview"
@@ -11,8 +15,11 @@ object ClientDestinations {
     const val TOUR_ID = "tour"
 }
 
-class ClientNavigationActions(private val navController: NavHostController) {
-    fun navigateToOverview() {
+class ClientNavigationActions(private val navController: NavHostController, cookie: MutableState<Cookie>) {
+    var cookie by cookie
+
+    fun navigateToOverview(cookie: Cookie = Cookie.None) {
+        this.cookie = cookie
         navController.navigate(ClientDestinations.OVERVIEW) {
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
@@ -22,7 +29,8 @@ class ClientNavigationActions(private val navController: NavHostController) {
         }
     }
 
-    fun navigateToTour(id: String) {
+    fun navigateToTour(id: String, cookie: Cookie = Cookie.None) {
+        this.cookie = cookie
         navController.navigate("${ClientDestinations.VIEWER}/$id") {
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
@@ -32,7 +40,8 @@ class ClientNavigationActions(private val navController: NavHostController) {
         }
     }
 
-    fun navigateToAbout() {
+    fun navigateToAbout(cookie: Cookie = Cookie.None) {
+        this.cookie = cookie
         navController.navigate(ClientDestinations.ABOUT) {
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
@@ -42,7 +51,7 @@ class ClientNavigationActions(private val navController: NavHostController) {
         }
     }
 
-    fun navigateBack() {
-        navController.popBackStack()
+    fun navigateBack(cookie: Cookie = Cookie.None) {
+        if (navController.popBackStack()) this.cookie = cookie
     }
 }

@@ -16,9 +16,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 sealed interface OverviewUiState {
-    object Loading: OverviewUiState
+    data object Loading: OverviewUiState
     data class Error(val errorMessages: List<ErrorMessage>): OverviewUiState
-    object Empty: OverviewUiState
+    data object Empty: OverviewUiState
     data class Tours(val highlighted: Tour, val other: List<Tour>): OverviewUiState
 }
 

@@ -1,6 +1,7 @@
 package io.gitlab.jfronny.kirchenfuehrung.client.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -13,6 +14,7 @@ import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import io.gitlab.jfronny.kirchenfuehrung.client.ClientApplication.Companion.TOUR_URI
 import io.gitlab.jfronny.kirchenfuehrung.client.data.ToursRepository
+import io.gitlab.jfronny.kirchenfuehrung.client.model.Cookie
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.ClientDestinations.TOUR_ID
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.about.AboutRoute
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.overview.OverviewRoute
@@ -28,7 +30,8 @@ fun ClientNavGraph(
     navController: NavHostController = rememberNavController(),
     startDestination: String = ClientDestinations.OVERVIEW
 ) {
-    val navigationActions = remember(navController) { ClientNavigationActions(navController) }
+    val cookie = remember { mutableStateOf<Cookie>(Cookie.None) }
+    val navigationActions = remember(navController, cookie) { ClientNavigationActions(navController, cookie) }
     NavHost(
         navController = navController,
         startDestination = startDestination,

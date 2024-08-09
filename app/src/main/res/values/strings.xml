@@ -15,8 +15,14 @@
     <string name="error_no_internet">No network connection</string>
     <string name="error_timeout">Timeout</string>
     <string name="error_unknown">Unknown error</string>
+
     <string name="headphones_title">Use headphones</string>
     <string name="headphones_description">Please use headphones to not disturb other visitors.</string>
     <string name="headphones_not_now">Not now</string>
     <string name="headphones_check_again">Check again</string>
+
+    <string name="feedback_title">Feedback</string>
+    <string name="feedback_dismiss">Not now</string>
+    <string name="feedback_message">Please send us any feedback you have!</string>
+    <string name="feedback_send">OK</string>
 </resources>

@@ -1,7 +1,10 @@
 package io.gitlab.jfronny.kirchenfuehrung.client.ui.overview
 
+import android.content.Intent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,11 +19,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -28,11 +33,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -45,11 +52,17 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import io.gitlab.jfronny.kirchenfuehrung.client.R
+import io.gitlab.jfronny.kirchenfuehrung.client.model.Cookie
 import io.gitlab.jfronny.kirchenfuehrung.client.model.Tour
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.ClientNavigationActions
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.components.ClientSnackbarHost
@@ -70,11 +83,13 @@ fun OverviewRoute(
     OverviewRoute(
         uiState = uiState,
         isExpandedScreen = isExpandedScreen,
-        onErrorDismiss = { overviewViewModel.errorShown(it) },
-        onRefresh = { overviewViewModel.refreshTours() },
-        onSelectTour = { navigation.navigateToTour(it) },
-        onSelectAbout = { navigation.navigateToAbout() },
-        snackbarHostState = snackbarHostState
+        onErrorDismiss = overviewViewModel::errorShown,
+        onRefresh = overviewViewModel::refreshTours,
+        onSelectTour = navigation::navigateToTour,
+        onSelectAbout = navigation::navigateToAbout,
+        snackbarHostState = snackbarHostState,
+        cookie = navigation.cookie,
+        setCookie = { navigation.cookie = it }
     )
 }
 
@@ -87,7 +102,9 @@ fun OverviewRoute(
     onRefresh: () -> Unit,
     onSelectTour: (String) -> Unit,
     onSelectAbout: () -> Unit,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    cookie: Cookie,
+    setCookie: (Cookie) -> Unit
 ) {
     val overviewListLazyListState = rememberLazyListState()
     val showTopAppBar = true
@@ -151,6 +168,10 @@ fun OverviewRoute(
 
             PullRefreshIndicator(pullRefreshState.refreshing, pullRefreshState, Modifier.align(Alignment.TopCenter))
         }
+    }
+
+    if (cookie is Cookie.Feedback) {
+        FeedbackDialog(feedback = cookie, dismiss = { setCookie(Cookie.None) })
     }
 }
 
@@ -258,7 +279,7 @@ fun TourCardSimple(
 
 @Composable
 private fun ToursListDivider() {
-    Divider(
+    HorizontalDivider(
         modifier = Modifier.padding(horizontal = 14.dp),
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
     )
@@ -303,9 +324,9 @@ fun TourCardTop(tour: Tour, modifier: Modifier = Modifier) {
             .padding(16.dp)
     ) {
         TourImage(tour, Modifier
-                .heightIn(max = 180.dp)
-                .fillMaxWidth()
-                .clip(shape = MaterialTheme.shapes.medium), ContentScale.Crop)
+            .heightIn(max = 180.dp)
+            .fillMaxWidth()
+            .clip(shape = MaterialTheme.shapes.medium), ContentScale.Crop)
         Spacer(Modifier.height(16.dp))
 
         Text(
@@ -313,5 +334,73 @@ fun TourCardTop(tour: Tour, modifier: Modifier = Modifier) {
             style = typography.titleLarge,
             modifier = Modifier.padding(bottom = 8.dp)
         )
+    }
+}
+
+@Composable
+fun FeedbackDialog(feedback: Cookie.Feedback, dismiss: () -> Unit) {
+    Dialog(
+        onDismissRequest = dismiss,
+        properties = DialogProperties()
+    ) {
+        Card(
+            shape = RoundedCornerShape(10.dp),
+            modifier = Modifier.padding(10.dp, 5.dp, 10.dp, 10.dp)
+        ) {
+            Column {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = stringResource(R.string.feedback_title),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(top = 5.dp)
+                            .fillMaxWidth(),
+                        style = MaterialTheme.typography.labelLarge,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = stringResource(R.string.feedback_message),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(top = 10.dp, start = 25.dp, end = 25.dp)
+                            .fillMaxWidth(),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp)
+                        .background(MaterialTheme.colorScheme.secondaryContainer),
+                    horizontalArrangement = Arrangement.SpaceAround) {
+
+                    TextButton(onClick = dismiss) {
+                        Text(
+                            text = stringResource(R.string.feedback_dismiss),
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.padding(top = 5.dp, bottom = 5.dp)
+                        )
+                    }
+                    val context = LocalContext.current
+                    TextButton(onClick = {
+                        context.startActivity(Intent(Intent.ACTION_SENDTO).apply {
+                            data = "mailto:".toUri()
+                            putExtra(Intent.EXTRA_EMAIL, arrayOf("contact-project+kirchewds-kirchenfuehrung-data-60715903-issue-@incoming.gitlab.com"))
+                            putExtra(Intent.EXTRA_SUBJECT, "${feedback.keyword} for ${feedback.track.tour.name}/${feedback.track.name}")
+                        })
+                    }, modifier = Modifier.padding(10.dp)) {
+                        Text(
+                            stringResource(R.string.feedback_send),
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(top = 5.dp, bottom = 5.dp)
+                        )
+                    }
+                }
+            }
+        }
     }
 }

@@ -38,6 +38,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -63,6 +64,7 @@ import androidx.media3.common.Player.STATE_ENDED
 import androidx.media3.common.Player.STATE_READY
 import coil.compose.AsyncImage
 import io.gitlab.jfronny.kirchenfuehrung.client.R
+import io.gitlab.jfronny.kirchenfuehrung.client.model.Cookie
 import io.gitlab.jfronny.kirchenfuehrung.client.model.Track
 import io.gitlab.jfronny.kirchenfuehrung.client.playback.PlayerConnection
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.ClientNavigationActions
@@ -87,9 +89,9 @@ fun ViewerRoute(
     ViewerRoute(
         uiState = uiState,
         isExpandedScreen = isExpandedScreen,
-        onErrorDismiss = { viewerViewModel.errorShown(it) },
-        onRefresh = { viewerViewModel.refreshTour() },
-        onBack = { navigation.navigateBack() },
+        onErrorDismiss = viewerViewModel::errorShown,
+        onRefresh = viewerViewModel::refreshTour,
+        onBack = navigation::navigateBack,
         snackbarHostState = snackbarHostState
     )
 }
@@ -101,7 +103,7 @@ fun ViewerRoute(
     isExpandedScreen: Boolean,
     onErrorDismiss: (Long) -> Unit,
     onRefresh: () -> Unit,
-    onBack: () -> Unit,
+    onBack: (Cookie) -> Unit,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ) {
     val playerConnection = LocalPlayerConnection.current ?: return
@@ -113,7 +115,7 @@ fun ViewerRoute(
 
     BackHandler {
         playerConnection.stop()
-        onBack()
+        onBack(currentTrack?.let { Cookie.Feedback.Gesture(it) } ?: Cookie.None)
     }
 
     Scaffold(
@@ -142,8 +144,8 @@ fun ViewerRoute(
                     if (currentTrack == null) {
                         Box(contentModifier.fillMaxSize())
                     } else {
-                        if (isExpandedScreen) ExpandedPlayer(currentTrack!!, playerConnection)
-                        else PhonePlayer(currentTrack!!, playerConnection)
+                        if (isExpandedScreen) ExpandedPlayer(currentTrack!!, playerConnection, onBack)
+                        else PhonePlayer(currentTrack!!, playerConnection, onBack)
                     }
                 }
                 is ViewerUiState.Error -> {
@@ -182,7 +184,7 @@ fun ViewerRoute(
 }
 
 @Composable
-fun ExpandedPlayer(track: Track, playerConnection: PlayerConnection) {
+fun ExpandedPlayer(track: Track, playerConnection: PlayerConnection, onBack: (Cookie) -> Unit) {
     Row(
         modifier = Modifier
             .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
@@ -201,14 +203,14 @@ fun ExpandedPlayer(track: Track, playerConnection: PlayerConnection) {
                 .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top))
         ) {
             Spacer(Modifier.weight(1f))
-            ControlsContent(track, playerConnection)
+            ControlsContent(track, playerConnection, onBack)
             Spacer(Modifier.weight(1f))
         }
     }
 }
 
 @Composable
-fun PhonePlayer(track: Track, playerConnection: PlayerConnection) {
+fun PhonePlayer(track: Track, playerConnection: PlayerConnection, onBack: (Cookie) -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -221,7 +223,7 @@ fun PhonePlayer(track: Track, playerConnection: PlayerConnection) {
             Thumbnail(track)
         }
 
-        ControlsContent(track, playerConnection)
+        ControlsContent(track, playerConnection, onBack)
 
         Spacer(Modifier.height(24.dp))
     }
@@ -239,7 +241,7 @@ fun Thumbnail(track: Track) {
 }
 
 @Composable
-fun ControlsContent(track: Track, playerConnection: PlayerConnection) {
+fun ControlsContent(track: Track, playerConnection: PlayerConnection, onBack: (Cookie) -> Unit) {
     Text(
         text = track.name,
         style = MaterialTheme.typography.titleLarge,
@@ -254,14 +256,14 @@ fun ControlsContent(track: Track, playerConnection: PlayerConnection) {
     val playbackState by playerConnection.playbackState.collectAsState()
     val isPlaying by playerConnection.isPlaying.collectAsState()
 
-    val canSkipPrevious by playerConnection.canSkipPrevious.collectAsState()
-    val canSkipNext by playerConnection.canSkipNext.collectAsState()
+    val isInitialTrack by playerConnection.isInitialTrack.collectAsState()
+    val isFinalTrack by playerConnection.isFinalTrack.collectAsState()
 
     var position by rememberSaveable(playbackState) {
-        mutableStateOf(playerConnection.player.currentPosition)
+        mutableLongStateOf(playerConnection.player.currentPosition)
     }
     var duration by rememberSaveable(playbackState) {
-        mutableStateOf(playerConnection.player.duration)
+        mutableLongStateOf(playerConnection.player.duration)
     }
     var sliderPosition by remember {
         mutableStateOf<Long?>(null)
@@ -329,7 +331,7 @@ fun ControlsContent(track: Track, playerConnection: PlayerConnection) {
         Box(modifier = Modifier.weight(1f)) {
             ResizableIconButton(
                 icon = R.drawable.skip_previous,
-                enabled = canSkipPrevious,
+                enabled = !isInitialTrack,
                 modifier = Modifier
                     .size(32.dp)
                     .align(Alignment.Center),
@@ -373,14 +375,25 @@ fun ControlsContent(track: Track, playerConnection: PlayerConnection) {
         Spacer(Modifier.width(8.dp))
 
         Box(modifier = Modifier.weight(1f)) {
-            ResizableIconButton(
-                icon = R.drawable.skip_next,
-                enabled = canSkipNext,
-                modifier = Modifier
-                    .size(32.dp)
-                    .align(Alignment.Center),
-                onClick = playerConnection.player::seekToNext
-            )
+            if (isFinalTrack) {
+                ResizableIconButton(
+                    icon = R.drawable.undo,
+                    enabled = true,
+                    modifier = Modifier
+                        .size(32.dp)
+                        .align(Alignment.Center),
+                    onClick = { onBack(Cookie.Feedback.Finished(track)) }
+                )
+            } else {
+                ResizableIconButton(
+                    icon = R.drawable.skip_next,
+                    enabled = true,
+                    modifier = Modifier
+                        .size(32.dp)
+                        .align(Alignment.Center),
+                    onClick = playerConnection.player::seekToNext
+                )
+            }
         }
     }
 
@@ -448,7 +461,6 @@ fun HeadphonesDialog(showHeadphonesScreen: MutableState<Boolean>, playerConnecti
                         showHeadphonesScreen.value = false
                         playerConnection.player.playWhenReady = true
                     }) {
-
                         Text(
                             stringResource(R.string.headphones_not_now),
                             fontWeight = FontWeight.Bold,

@@ -17,4 +17,8 @@
     <string name="headphones_description">Bitte benutze Kopfhörer, um andere Besucher nicht zu stören</string>
     <string name="headphones_not_now">Jetzt nicht</string>
     <string name="headphones_check_again">Überprüfe erneut</string>
+    <string name="feedback_title">Feedback</string>
+    <string name="feedback_dismiss">Jetzt nicht</string>
+    <string name="feedback_message">Bitte senden sie ihre Vorschläge!</string>
+    <string name="feedback_send">OK</string>
 </resources>
