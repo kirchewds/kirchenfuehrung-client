@@ -1,12 +1,3 @@
-import com.android.build.api.instrumentation.AsmClassVisitorFactory
-import com.android.build.api.instrumentation.ClassContext
-import com.android.build.api.instrumentation.ClassData
-import com.android.build.api.instrumentation.FramesComputationMode
-import com.android.build.api.instrumentation.InstrumentationParameters
-import com.android.build.api.instrumentation.InstrumentationScope
-import org.objectweb.asm.ClassVisitor
-import org.objectweb.asm.Opcodes
-
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -63,28 +54,11 @@ android {
     }
 }
 
-androidComponents {
-    onVariants { variant ->
-        variant.transformClassesWith(StripCommonsClassVisitorFactory::class.java, InstrumentationScope.ALL) {}
-        variant.setAsmFramesComputationMode(FramesComputationMode.COPY_FRAMES)
-    }
-}
-
-interface StripCommonsParams: InstrumentationParameters
-abstract class StripCommonsClassVisitorFactory: AsmClassVisitorFactory<StripCommonsParams> {
-    override fun isInstrumentable(classData: ClassData): Boolean = classData.className.startsWith("io.gitlab.jfronny.commons.reflect")
-    override fun createClassVisitor(classContext: ClassContext, nextClassVisitor: ClassVisitor): ClassVisitor = object: ClassVisitor(Opcodes.ASM9) {
-        override fun visit(version: Int, access: Int, name: String?, signature: String?, superName: String?, interfaces: Array<out String>?) = nextClassVisitor.visit(version, access, name, signature, superName, interfaces)
-        override fun visitEnd() = nextClassVisitor.visitEnd()
-        // Others are not implemented -> any content is removed
-    }
-}
-
 dependencies {
     // JDK support
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs_nio:2.0.4")
     // API
-    implementation("io.gitlab.jfronny:commons-serialize-gson:1.6-SNAPSHOT")
+    implementation("io.gitlab.jfronny:gson:2.10.3-SNAPSHOT")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     // Images
     implementation("io.coil-kt:coil-compose:2.6.0")

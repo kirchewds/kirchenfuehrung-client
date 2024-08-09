@@ -21,4 +21,3 @@
 #-renamesourcefileattribute SourceFile
 
 -dontwarn org.slf4j.impl.StaticLoggerBinder
--dontwarn java.util.ServiceLoader$Provider

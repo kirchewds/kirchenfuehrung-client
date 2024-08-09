@@ -1,6 +1,6 @@
 package io.gitlab.jfronny.kirchenfuehrung.client.data.impl
 
-import io.gitlab.jfronny.commons.serialize.gson.api.v2.GsonHolders
+import io.gitlab.jfronny.gson.GsonBuilder
 import io.gitlab.jfronny.kirchenfuehrung.client.model.Tours
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -18,7 +18,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 class NetworkToursRepository(private val toursJsonUrl: HttpUrl): AbstractToursRepository() {
-    private val gson = GsonHolders.API.apply { it.serializeNulls() }.gson
+    private val gson = GsonBuilder().serializeNulls().create()
     private val client = OkHttpClient()
     private val mutex = Mutex()
     private var tours: Tours? = null
