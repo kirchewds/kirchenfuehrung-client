@@ -7,6 +7,6 @@ import dagger.hilt.android.HiltAndroidApp
 class ClientApplication: Application() {
     companion object {
         const val TOUR_URI = "kirchenfuehrung://"
-        const val TOURS_JSON_URI = "https://johannes.frohnmeyer-wds.de/kirchenfuehrung-test/tours.json"
+        const val TOURS_JSON_URI = "https://kirchewds.gitlab.io/kirchenfuehrung-data/tours.json"
     }
 }
