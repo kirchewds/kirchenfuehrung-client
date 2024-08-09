@@ -302,11 +302,10 @@ fun TourCardTop(tour: Tour, modifier: Modifier = Modifier) {
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        val imageModifier = Modifier
-            .heightIn(max = 180.dp)
-            .fillMaxWidth()
-            .clip(shape = MaterialTheme.shapes.medium)
-        TourImage(tour, imageModifier, ContentScale.Crop)
+        TourImage(tour, Modifier
+                .heightIn(max = 180.dp)
+                .fillMaxWidth()
+                .clip(shape = MaterialTheme.shapes.medium), ContentScale.Crop)
         Spacer(Modifier.height(16.dp))
 
         Text(
