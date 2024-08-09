@@ -386,12 +386,13 @@ fun FeedbackDialog(feedback: Cookie.Feedback, dismiss: () -> Unit) {
                     }
                     val context = LocalContext.current
                     TextButton(onClick = {
+                        dismiss()
                         context.startActivity(Intent(Intent.ACTION_SENDTO).apply {
                             data = "mailto:".toUri()
                             putExtra(Intent.EXTRA_EMAIL, arrayOf("contact-project+kirchewds-kirchenfuehrung-data-60715903-issue-@incoming.gitlab.com"))
                             putExtra(Intent.EXTRA_SUBJECT, "${feedback.keyword} for ${feedback.track.tour.name}/${feedback.track.name}")
                         })
-                    }, modifier = Modifier.padding(10.dp)) {
+                    }) {
                         Text(
                             stringResource(R.string.feedback_send),
                             fontWeight = FontWeight.ExtraBold,

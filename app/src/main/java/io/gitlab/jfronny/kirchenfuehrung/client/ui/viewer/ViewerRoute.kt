@@ -113,9 +113,13 @@ fun ViewerRoute(
 
     var initial by rememberSaveable { mutableStateOf(true) }
 
-    BackHandler {
+    fun goBack(cookie: Cookie) {
         playerConnection.stop()
-        onBack(currentTrack?.let { Cookie.Feedback.Gesture(it) } ?: Cookie.None)
+        onBack(cookie)
+    }
+
+    BackHandler {
+        goBack(currentTrack?.let { Cookie.Feedback.Gesture(it) } ?: Cookie.None)
     }
 
     Scaffold(
@@ -144,8 +148,8 @@ fun ViewerRoute(
                     if (currentTrack == null) {
                         Box(contentModifier.fillMaxSize())
                     } else {
-                        if (isExpandedScreen) ExpandedPlayer(currentTrack!!, playerConnection, onBack)
-                        else PhonePlayer(currentTrack!!, playerConnection, onBack)
+                        if (isExpandedScreen) ExpandedPlayer(currentTrack!!, playerConnection, ::goBack)
+                        else PhonePlayer(currentTrack!!, playerConnection, ::goBack)
                     }
                 }
                 is ViewerUiState.Error -> {
