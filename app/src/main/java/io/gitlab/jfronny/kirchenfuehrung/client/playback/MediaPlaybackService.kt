@@ -45,7 +45,7 @@ import io.gitlab.jfronny.kirchenfuehrung.client.model.Tour
 import io.gitlab.jfronny.kirchenfuehrung.client.model.Track
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.MainActivity
 import io.gitlab.jfronny.kirchenfuehrung.client.util.CoilBitmapLoader
-import io.gitlab.jfronny.kirchenfuehrung.client.util.collect
+import io.gitlab.jfronny.kirchenfuehrung.client.util.metadata
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -60,18 +60,18 @@ import javax.inject.Inject
 
 @OptIn(UnstableApi::class)
 @AndroidEntryPoint
-class MediaPlaybackService: MediaLibraryService(), Player.Listener, MediaLibraryService.MediaLibrarySession.Callback {
+class MediaPlaybackService: MediaLibraryService(), SimplePlayerListener, MediaLibraryService.MediaLibrarySession.Callback {
     @Inject lateinit var toursRepository: ToursRepository
     @Inject lateinit var playerCache: SimpleCache
 
     private val scope = CoroutineScope(Dispatchers.Main) + Job()
     lateinit var player: ExoPlayer
+    private lateinit var bitmapLoader: CoilBitmapLoader
     private lateinit var mediaSession: MediaLibrarySession
     private var binder = MusicBinder()
     private lateinit var audioManager: AudioManager
 
     val currentMediaMetadata = MutableStateFlow<Track?>(null)
-    private var currentTrack: Track? = null
 
     private val headsetStateReceiver = object: BroadcastReceiver() {
         val supportedActions = arrayOf(
@@ -110,6 +110,7 @@ class MediaPlaybackService: MediaLibraryService(), Player.Listener, MediaLibrary
                 addListener(this@MediaPlaybackService)
                 repeatMode = Player.REPEAT_MODE_OFF
             }
+        bitmapLoader = CoilBitmapLoader(this, scope)
         mediaSession = MediaLibrarySession.Builder(this, player, this)
             .setSessionActivity(
                 PendingIntent.getActivity(
@@ -119,17 +120,13 @@ class MediaPlaybackService: MediaLibraryService(), Player.Listener, MediaLibrary
                     PendingIntent.FLAG_IMMUTABLE
                 )
             )
-            .setBitmapLoader(CoilBitmapLoader(this, scope))
+            .setBitmapLoader(bitmapLoader)
             .build()
 
         audioManager = applicationContext.getSystemService()!!
         registerReceiver(headsetStateReceiver, IntentFilter().apply {
             headsetStateReceiver.supportedActions.forEach { addAction(it) }
         })
-
-        currentMediaMetadata.collect(scope) {
-            currentTrack = it
-        }
     }
 
     private val supportedTypes by lazy {
@@ -264,8 +261,17 @@ class MediaPlaybackService: MediaLibraryService(), Player.Listener, MediaLibrary
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo) = mediaSession
 
+    override fun updateTimeline() {
+        val idx = player.nextMediaItemIndex
+        if (idx != C.INDEX_UNSET) {
+            player.getMediaItemAt(idx).metadata?.let { bitmapLoader.preload(it.image) }
+        }
+    }
+
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
         if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO) player.pause()
+        currentMediaMetadata.value = mediaItem?.metadata
+        super.onMediaItemTransition(mediaItem, reason)
     }
 
     inner class MusicBinder: Binder() {
