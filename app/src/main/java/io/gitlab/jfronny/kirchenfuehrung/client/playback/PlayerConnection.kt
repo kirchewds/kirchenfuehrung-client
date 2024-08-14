@@ -37,6 +37,8 @@ class PlayerConnection(
 
         playbackState.value = player.playbackState
         playWhenReady.value = player.playWhenReady
+
+        updateTimeline()
     }
 
     fun play(item: Tour) = service.play(item)
@@ -59,11 +61,11 @@ class PlayerConnection(
     override fun updateTimeline() {
         if (!player.currentTimeline.isEmpty) {
             val window = player.currentTimeline.getWindow(player.currentMediaItemIndex, Timeline.Window())
-            isInitialTrack.value = !(player.isCommandAvailable(COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM)
-                    || !window.isLive
-                    || player.isCommandAvailable(COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM))
-            isFinalTrack.value = !(window.isLive && window.isDynamic
-                    || player.isCommandAvailable(COMMAND_SEEK_TO_NEXT_MEDIA_ITEM))
+            isInitialTrack.value = !player.isCommandAvailable(COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM)
+                    && !window.isLive
+                    && !player.isCommandAvailable(COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM)
+            isFinalTrack.value = (!window.isLive || !window.isDynamic)
+                    && !player.isCommandAvailable(COMMAND_SEEK_TO_NEXT_MEDIA_ITEM)
         } else {
             isInitialTrack.value = true
             isFinalTrack.value = true
