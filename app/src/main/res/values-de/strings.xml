@@ -21,4 +21,5 @@
     <string name="feedback_dismiss">Jetzt nicht</string>
     <string name="feedback_message">Bitte senden sie ihre Vorschläge!</string>
     <string name="feedback_send">OK</string>
+    <string name="about_legal">Impressum</string>
 </resources>

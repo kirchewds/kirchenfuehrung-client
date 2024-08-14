@@ -5,6 +5,8 @@
     <string name="about_author">Created by Johannes Frohnmeyer</string>
     <string name="about_bugs">File a bug report</string>
     <string name="about_code">Source Code</string>
+    <string name="about_legal">Legal</string>
+    <string name="about_legal_text" translatable="false">Kath. Kirchengemeinde St. Peter und Paul\nKapuzinerberg 1\n71263 Weil der Stadt\ninfo@kirchewds.de</string>
 
     <!-- Notification name -->
     <string name="music_player">Music Player</string>
