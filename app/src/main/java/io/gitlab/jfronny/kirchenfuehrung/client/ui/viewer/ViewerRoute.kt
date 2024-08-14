@@ -382,7 +382,6 @@ fun ControlsContent(track: Track, playerConnection: PlayerConnection, onBack: (C
             if (isFinalTrack) {
                 ResizableIconButton(
                     icon = R.drawable.undo,
-                    enabled = true,
                     modifier = Modifier
                         .size(32.dp)
                         .align(Alignment.Center),
@@ -391,7 +390,6 @@ fun ControlsContent(track: Track, playerConnection: PlayerConnection, onBack: (C
             } else {
                 ResizableIconButton(
                     icon = R.drawable.skip_next,
-                    enabled = true,
                     modifier = Modifier
                         .size(32.dp)
                         .align(Alignment.Center),
