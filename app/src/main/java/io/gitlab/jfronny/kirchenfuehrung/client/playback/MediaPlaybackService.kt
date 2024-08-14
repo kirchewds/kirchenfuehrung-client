@@ -30,7 +30,6 @@ import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MediaSource
-import androidx.media3.extractor.ExtractorsFactory
 import androidx.media3.extractor.mp3.Mp3Extractor
 import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.LibraryResult
@@ -100,7 +99,7 @@ class MediaPlaybackService: MediaLibraryService(), SimplePlayerListener, MediaLi
             .setAudioAttributes(
                 AudioAttributes.Builder()
                     .setUsage(C.USAGE_MEDIA)
-                    .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+                    .setContentType(C.AUDIO_CONTENT_TYPE_SPEECH)
                     .build(), true
             )
             .setSeekBackIncrementMs(5000)
@@ -206,11 +205,7 @@ class MediaPlaybackService: MediaLibraryService(), SimplePlayerListener, MediaLi
         }
     }
 
-    private fun createExtractorsFactory() = ExtractorsFactory {
-        arrayOf(Mp3Extractor())
-    }
-
-    private fun createMediaSourceFactory(): MediaSource.Factory = DefaultMediaSourceFactory(createDataSourceFactory(), createExtractorsFactory())
+    private fun createMediaSourceFactory(): MediaSource.Factory = DefaultMediaSourceFactory(createDataSourceFactory(), Mp3Extractor.FACTORY)
 
     fun play(item: Tour) {
         player.clearMediaItems()
