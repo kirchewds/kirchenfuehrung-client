@@ -269,9 +269,6 @@ fun ControlsContent(track: Track, playerConnection: PlayerConnection, onBack: (C
     var duration by rememberSaveable(playbackState) {
         mutableLongStateOf(playerConnection.player.duration)
     }
-    var sliderPosition by remember {
-        mutableStateOf<Long?>(null)
-    }
     val showHeadphonesScreen = rememberSaveable(playbackState) {
         mutableStateOf(false)
     }
@@ -286,6 +283,9 @@ fun ControlsContent(track: Track, playerConnection: PlayerConnection, onBack: (C
         }
     }
 
+    var sliderPosition by remember {
+        mutableStateOf<Long?>(null)
+    }
     Slider(
         value = (sliderPosition ?: position).toFloat(),
         valueRange = 0f..(if (duration == C.TIME_UNSET) 0f else duration.toFloat()),
