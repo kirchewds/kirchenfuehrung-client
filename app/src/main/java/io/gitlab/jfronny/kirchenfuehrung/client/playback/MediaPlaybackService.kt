@@ -201,7 +201,7 @@ class MediaPlaybackService: MediaLibraryService(), SimplePlayerListener, MediaLi
             }
             trackUrlCache[mediaId] = track.audio
 
-            dataSpec.withUri(track.audio).subrange(dataSpec.uriPositionOffset, CHUNK_LENGTH)
+            dataSpec.withUri(track.audio)
         }
     }
 
@@ -258,9 +258,7 @@ class MediaPlaybackService: MediaLibraryService(), SimplePlayerListener, MediaLi
 
     override fun updateTimeline() {
         val idx = player.nextMediaItemIndex
-        if (idx != C.INDEX_UNSET) {
-            player.getMediaItemAt(idx).metadata?.let { bitmapLoader.preload(it.image) }
-        }
+        if (idx != C.INDEX_UNSET) player.getMediaItemAt(idx).metadata?.let { bitmapLoader.preload(it.image) }
     }
 
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
