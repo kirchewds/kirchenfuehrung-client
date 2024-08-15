@@ -19,7 +19,7 @@
     <string name="headphones_check_again">Überprüfe erneut</string>
     <string name="feedback_title">Feedback</string>
     <string name="feedback_dismiss">Jetzt nicht</string>
-    <string name="feedback_message">Bitte senden sie ihre Vorschläge!</string>
+    <string name="feedback_message">Möchten Sie uns eine Rückmeldung zur Kirchenführung geben?</string>
     <string name="feedback_send">OK</string>
     <string name="about_legal">Impressum</string>
 </resources>
