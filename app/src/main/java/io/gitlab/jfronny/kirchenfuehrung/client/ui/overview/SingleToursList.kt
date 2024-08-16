@@ -94,7 +94,15 @@ fun ControlsContent(tour: Tour, onTourTapped: (id: String) -> Unit) {
         text = tour.name,
         style = MaterialTheme.typography.titleLarge,
         fontWeight = FontWeight.Bold,
-        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.padding(horizontal = 16.dp)
+    )
+
+    Spacer(Modifier.height(12.dp))
+
+    Text(
+        text = tour.description,
+        style = MaterialTheme.typography.bodyMedium,
         overflow = TextOverflow.Ellipsis,
         modifier = Modifier.padding(horizontal = 16.dp)
     )

@@ -79,6 +79,34 @@ private fun ToursListDivider() {
 }
 
 @Composable
+private fun TourCardTop(tour: Tour, modifier: Modifier = Modifier) {
+    val typography = MaterialTheme.typography
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        TourImage(tour, Modifier
+            .heightIn(max = 180.dp)
+            .fillMaxWidth()
+            .clip(shape = MaterialTheme.shapes.medium), ContentScale.Crop)
+        Spacer(Modifier.height(16.dp))
+
+        Text(
+            text = tour.name,
+            style = typography.titleLarge,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        Text(
+            text = tour.description,
+            style = typography.bodyMedium,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+    }
+}
+
+@Composable
 private fun TourCardSimple(
     tour: Tour,
     navigateToTour: (String) -> Unit
@@ -98,28 +126,12 @@ private fun TourCardSimple(
                 .padding(vertical = 10.dp)
         ) {
             TourTitle(tour)
+
+            Text(
+                text = tour.description,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(end = 16.dp)
+            )
         }
-    }
-}
-
-@Composable
-private fun TourCardTop(tour: Tour, modifier: Modifier = Modifier) {
-    val typography = MaterialTheme.typography
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        TourImage(tour, Modifier
-            .heightIn(max = 180.dp)
-            .fillMaxWidth()
-            .clip(shape = MaterialTheme.shapes.medium), ContentScale.Crop)
-        Spacer(Modifier.height(16.dp))
-
-        Text(
-            text = tour.name,
-            style = typography.titleLarge,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
     }
 }

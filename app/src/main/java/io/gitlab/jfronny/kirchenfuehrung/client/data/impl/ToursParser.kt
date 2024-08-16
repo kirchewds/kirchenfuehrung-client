@@ -57,12 +57,14 @@ object ToursParser {
 
     private fun parseTour(reader: JsonReader): Tour {
         var name: String? = null
+        var description: String? = null
         var cover: String? = null
         var tracks: List<Track>? = null
         reader.beginObject()
         while (reader.peek() != JsonToken.END_OBJECT) {
             when (val k = reader.nextName()) {
                 "name" -> name = reader.nextString()
+                "description" -> description = reader.nextString()
                 "cover" -> cover = if (reader.peek() == JsonToken.NULL) {
                     reader.nextNull()
                     null
@@ -79,8 +81,12 @@ object ToursParser {
             Log.e(TAG, "parseTour: Tour lacks name. Using placeholder")
             name = "Unnamed Tour"
         }
+        if (description == null) {
+            Log.e(TAG, "parseTour: Tour lacks description. Using placeholder")
+            description = "No description available"
+        }
         if (tracks.isNullOrEmpty()) throw IllegalStateException("Tour lacks tracks")
-        val tour = Tour(name, cover, tracks)
+        val tour = Tour(name, description, cover, tracks)
         tracks.forEach { it.tour = tour }
         return tour
     }
