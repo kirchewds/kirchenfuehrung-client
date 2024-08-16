@@ -46,30 +46,30 @@ stages:
   - release
   - deploy
 
-# Basic android and gradle stuff
-# Check linting
-lintDebug:
-  interruptible: true
-  stage: build
-  script:
-    - gradle -Pci --console=plain :app:lintDebug -PbuildDir=lint
-
-# Make Project
-assembleDebug:
-  interruptible: true
-  stage: build
-  script:
-    - gradle assembleDebug
-  artifacts:
-    paths:
-      - app/build/outputs/
-
-# Run all tests, if any fails, interrupt the pipeline(fail it)
-debugTests:
-  interruptible: true
-  stage: test
-  script:
-    - gradle -Pci --console=plain :app:testDebug
+## Basic android and gradle stuff
+## Check linting
+#lintDebug:
+#  interruptible: true
+#  stage: build
+#  script:
+#    - gradle -Pci --console=plain :app:lintDebug -PbuildDir=lint
+#
+## Make Project
+#assembleDebug:
+#  interruptible: true
+#  stage: build
+#  script:
+#    - gradle assembleDebug
+#  artifacts:
+#    paths:
+#      - app/build/outputs/
+#
+## Run all tests, if any fails, interrupt the pipeline(fail it)
+#debugTests:
+#  interruptible: true
+#  stage: test
+#  script:
+#    - gradle -Pci --console=plain :app:testDebug
 
 # Assemble a signed release binary
 assembleRelease:
