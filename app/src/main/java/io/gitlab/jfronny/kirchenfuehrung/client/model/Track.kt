@@ -11,7 +11,7 @@ import io.gitlab.jfronny.kirchenfuehrung.client.ClientApplication
 import java.io.Serializable
 
 @Immutable
-data class Track(val name: String, val image: Uri, val audio: Uri): Serializable {
+data class Track(val name: String, val image: Uri?, val audio: Uri): Serializable {
     lateinit var tour: Tour
 
     val id: String get() = "${ClientApplication.TOUR_URI}${tour.name}/$name"

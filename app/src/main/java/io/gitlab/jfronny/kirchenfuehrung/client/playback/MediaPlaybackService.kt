@@ -89,7 +89,7 @@ class MediaPlaybackService: MediaLibraryService(), SimplePlayerListener, MediaLi
         setMediaNotificationProvider(
             DefaultMediaNotificationProvider(this, {NOTIFICATION_ID}, CHANNEL_ID, R.string.music_player)
                 .apply {
-                    setSmallIcon(R.drawable.ic_client_placeholder) //TODO nice small icon
+                    setSmallIcon(R.drawable.ic_launcher_foreground)
                 }
         )
         player = ExoPlayer.Builder(this)
@@ -258,7 +258,7 @@ class MediaPlaybackService: MediaLibraryService(), SimplePlayerListener, MediaLi
 
     override fun updateTimeline() {
         val idx = player.nextMediaItemIndex
-        if (idx != C.INDEX_UNSET) player.getMediaItemAt(idx).metadata?.let { bitmapLoader.preload(it.image) }
+        if (idx != C.INDEX_UNSET) player.getMediaItemAt(idx).metadata?.image?.let(bitmapLoader::preload)
     }
 
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {

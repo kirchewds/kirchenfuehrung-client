@@ -235,13 +235,22 @@ fun PhonePlayer(track: Track, playerConnection: PlayerConnection, onBack: (Cooki
 
 @Composable
 fun Thumbnail(track: Track) {
-    AsyncImage(
-        model = track.image.toString(),
-        contentDescription = null,
-        contentScale = ContentScale.Fit,
-        modifier = Modifier
-            .clip(RoundedCornerShape(6.dp))
-    )
+    if (track.image == null) {
+        Image(
+            painter = painterResource(R.drawable.ic_client_placeholder),
+            contentDescription = null, // decorative
+            contentScale = ContentScale.Fit,
+            modifier = Modifier.clip(RoundedCornerShape(6.dp)),
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
+        )
+    } else {
+        AsyncImage(
+            model = track.image.toString(),
+            contentDescription = null, // decorative
+            contentScale = ContentScale.Fit,
+            modifier = Modifier.clip(RoundedCornerShape(6.dp))
+        )
+    }
 }
 
 @Composable
@@ -354,13 +363,15 @@ fun ControlsContent(track: Track, playerConnection: PlayerConnection, onBack: (C
                     if (playbackState == STATE_ENDED) {
                         playerConnection.player.run {
                             seekTo(0, 0)
-                            if (skipHeadphonesDialog || playerConnection.isUsingHeadphones) playWhenReady = true
+                            if (skipHeadphonesDialog || playerConnection.isUsingHeadphones) playWhenReady =
+                                true
                             else showHeadphonesScreen.value = true
                         }
                     } else {
                         playerConnection.player.run {
                             if (playWhenReady) playWhenReady = false
-                            else if (skipHeadphonesDialog || playerConnection.isUsingHeadphones) playWhenReady = true
+                            else if (skipHeadphonesDialog || playerConnection.isUsingHeadphones) playWhenReady =
+                                true
                             else showHeadphonesScreen.value = true
                         }
                     }

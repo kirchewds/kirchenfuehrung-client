@@ -1,5 +1,6 @@
 package io.gitlab.jfronny.kirchenfuehrung.client.data.impl
 
+import android.util.Log
 import androidx.core.net.toUri
 import io.gitlab.jfronny.gson.stream.JsonReader
 import io.gitlab.jfronny.gson.stream.JsonToken
@@ -8,6 +9,8 @@ import io.gitlab.jfronny.kirchenfuehrung.client.model.Tours
 import io.gitlab.jfronny.kirchenfuehrung.client.model.Track
 
 object ToursParser {
+    private val TAG = "ToursParser"
+
     fun parseTours(reader: JsonReader): Result<Tours> {
         try {
             var highlight: String? = null
@@ -19,13 +22,22 @@ object ToursParser {
                 when (val k = reader.nextName()) {
                     "highlight" -> highlight = reader.nextString()
                     "tours" -> tours = parseToursArray(reader)
-                    else -> throw IllegalStateException("Unsupported tours json entry: $k")
+                    else -> {
+                        reader.skipValue()
+                        Log.e(TAG, "parseTours: Unsupported tours json entry: $k")
+                    }
                 }
             }
             reader.endObject()
-            if (highlight == null) throw IllegalStateException("Tours lacks highlight")
             if (tours.isNullOrEmpty()) throw IllegalStateException("Tours lacks tours")
-            val highlighted = tours.lastOrNull { it.name == highlight } ?: throw IllegalStateException("Highlight does not exist")
+            if (highlight == null) {
+                Log.e(TAG, "parseTours: Tours lacks highlight. Using first tour as highlight")
+                highlight = tours.first().name
+            }
+            val highlighted = tours.lastOrNull { it.name == highlight } ?: run {
+                Log.e(TAG, "parseTours: Highlight does not exist. Using first tour as highlight")
+                tours.first()
+            }
             val secondary = tours.associateBy { it.name }.filterKeys { it != highlight }
             return Result.success(Tours(highlighted, secondary))
         } catch (e: IllegalStateException) {
@@ -56,11 +68,17 @@ object ToursParser {
                     null
                 } else reader.nextString()
                 "tracks" -> tracks = parseTracksArray(reader)
-                else -> throw IllegalStateException("Unsupported tour json entry: $k")
+                else -> {
+                    reader.skipValue()
+                    Log.e(TAG, "parseTour: Unsupported tour json entry: $k")
+                }
             }
         }
         reader.endObject()
-        if (name == null) throw IllegalStateException("Tour lacks name")
+        if (name == null) {
+            Log.e(TAG, "parseTour: Tour lacks name. Using placeholder")
+            name = "Unnamed Tour"
+        }
         if (tracks.isNullOrEmpty()) throw IllegalStateException("Tour lacks tracks")
         val tour = Tour(name, cover, tracks)
         tracks.forEach { it.tour = tour }
@@ -87,13 +105,19 @@ object ToursParser {
                 "name" -> name = reader.nextString()
                 "image" -> image = reader.nextString()
                 "audio" -> audio = reader.nextString()
-                else -> throw IllegalStateException("Unsupported tour json entry: $k")
+                else -> {
+                    reader.skipValue()
+                    Log.e(TAG, "parseTrack: Unsupported tour json entry: $k")
+                }
             }
         }
         reader.endObject()
-        if (name == null) throw IllegalStateException("Track lacks name")
-        if (image == null) throw IllegalStateException("Track lacks image")
+        if (name == null) {
+            Log.e(TAG, "parseTrack: Track lacks name. Using placeholder")
+            name = "Unnamed Track"
+        }
+        if (image == null) Log.e(TAG, "parseTrack: Track lacks image")
         if (audio == null) throw IllegalStateException("Track lacks audio")
-        return Track(name, image.toUri(), audio.toUri())
+        return Track(name, image?.toUri(), audio.toUri())
     }
 }
