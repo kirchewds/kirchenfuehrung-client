@@ -13,5 +13,5 @@ dependencyResolutionManagement {
         maven("https://maven.frohnmeyer-wds.de/artifacts")
     }
 }
-rootProject.name = "Client"
+rootProject.name = "Kirchenführung"
 include(":app")

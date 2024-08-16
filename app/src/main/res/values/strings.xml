@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Church Tour</string>
+    <string name="app_name" translatable="false">Kirchenführung WdS</string>
     <string name="retry">Retry</string>
     <string name="about">About</string>
     <string name="about_author">Created by Johannes Frohnmeyer</string>
