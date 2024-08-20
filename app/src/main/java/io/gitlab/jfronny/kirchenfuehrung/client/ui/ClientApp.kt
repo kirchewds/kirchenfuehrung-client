@@ -18,11 +18,11 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import io.gitlab.jfronny.kirchenfuehrung.client.data.ToursRepository
-import io.gitlab.jfronny.kirchenfuehrung.client.ui.theme.ClientTheme
+import io.gitlab.jfronny.kirchenfuehrung.client.ui.theme.AppTheme
 
 @Composable
 fun ClientApp(repository: ToursRepository, widthSizeClass: WindowWidthSizeClass) {
-    ClientTheme {
+    AppTheme {
         val navController = rememberNavController()
 
         val navBackStackEntry by navController.currentBackStackEntryAsState()
