@@ -1,7 +1,6 @@
 package io.gitlab.jfronny.kirchenfuehrung.client.ui.overview
 
 import android.content.Intent
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,11 +34,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -49,11 +46,11 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
 import io.gitlab.jfronny.kirchenfuehrung.client.R
 import io.gitlab.jfronny.kirchenfuehrung.client.model.Cookie
 import io.gitlab.jfronny.kirchenfuehrung.client.model.Tour
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.ClientNavigationActions
+import io.gitlab.jfronny.kirchenfuehrung.client.ui.WebImage
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.Wordmark
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.components.ClientSnackbarHost
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.components.pullrefresh.PullRefreshIndicator
@@ -172,26 +169,6 @@ private fun OverviewTopAppBar(
         scrollBehavior = scrollBehavior,
         modifier = Modifier
     )
-}
-
-@Composable
-fun TourImage(tour: Tour, modifier: Modifier = Modifier, contentScale: ContentScale = ContentScale.Fit) {
-    if (tour.cover == null) {
-        Image(
-            painter = painterResource(R.drawable.ic_client_placeholder),
-            contentDescription = null, // decorative
-            contentScale = contentScale,
-            modifier = modifier,
-            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
-        )
-    } else {
-        AsyncImage(
-            model = tour.cover,
-            contentDescription = null, //decorative
-            contentScale = contentScale,
-            modifier = modifier
-        )
-    }
 }
 
 @Composable

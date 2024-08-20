@@ -4,7 +4,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -40,7 +38,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,17 +48,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -69,12 +62,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.C
 import androidx.media3.common.Player.STATE_ENDED
 import androidx.media3.common.Player.STATE_READY
-import coil.compose.AsyncImage
 import io.gitlab.jfronny.kirchenfuehrung.client.R
 import io.gitlab.jfronny.kirchenfuehrung.client.model.Cookie
 import io.gitlab.jfronny.kirchenfuehrung.client.model.Track
 import io.gitlab.jfronny.kirchenfuehrung.client.playback.PlayerConnection
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.ClientNavigationActions
+import io.gitlab.jfronny.kirchenfuehrung.client.ui.WebImage
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.components.ClientSnackbarHost
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.components.ResizableIconButton
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.components.pullrefresh.PullRefreshIndicator
@@ -83,7 +76,6 @@ import io.gitlab.jfronny.kirchenfuehrung.client.ui.components.pullrefresh.rememb
 import io.gitlab.jfronny.kirchenfuehrung.client.util.makeTimeString
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import kotlin.math.roundToInt
 
 @Composable
 fun ViewerRoute(
@@ -205,7 +197,7 @@ fun ExpandedPlayer(track: Track, playerConnection: PlayerConnection, onBack: (Co
             contentAlignment = Alignment.Center,
             modifier = Modifier.weight(1f)
         ) {
-            Thumbnail(track)
+            WebImage(url = track.image?.toString())
         }
 
         Column(
@@ -232,59 +224,12 @@ fun PhonePlayer(track: Track, playerConnection: PlayerConnection, onBack: (Cooki
             contentAlignment = Alignment.Center,
             modifier = Modifier.weight(1f)
         ) {
-            Thumbnail(track)
+            WebImage(url = track.image?.toString())
         }
 
         ControlsContent(track, playerConnection, onBack)
 
         Spacer(Modifier.height(24.dp))
-    }
-}
-
-@Composable
-fun Thumbnail(track: Track) {
-    var zoom by remember { mutableFloatStateOf(1f) }
-    var offsetX by remember { mutableFloatStateOf(0f) }
-    var offsetY by remember { mutableFloatStateOf(0f) }
-
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp.value
-    val screenHeight = configuration.screenHeightDp.dp.value
-
-    val modifier = Modifier
-        .clip(RoundedCornerShape(6.dp))
-        .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
-        .graphicsLayer(scaleX = zoom, scaleY = zoom)
-        .pointerInput(Unit) {
-            detectTransformGestures { _, pan, gestureZoom, _ ->
-                zoom = (zoom * gestureZoom).coerceIn(1f, 4f)
-                if (zoom > 1) {
-                    val dx = pan.x * zoom
-                    val dy = pan.y * zoom
-                    offsetX = (offsetX + dx).coerceIn(-(screenWidth * zoom)..(screenWidth * zoom))
-                    offsetY = (offsetY + dy).coerceIn(-(screenHeight * zoom)..(screenHeight * zoom))
-                } else {
-                    offsetX = 0f
-                    offsetY = 0f
-                }
-            }
-        }
-
-    if (track.image == null) {
-        Image(
-            painter = painterResource(R.drawable.ic_client_placeholder),
-            contentDescription = null, // decorative
-            contentScale = ContentScale.Fit,
-            modifier = modifier,
-            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
-        )
-    } else {
-        AsyncImage(
-            model = track.image.toString(),
-            contentDescription = null, // decorative
-            contentScale = ContentScale.Fit,
-            modifier = modifier
-        )
     }
 }
 

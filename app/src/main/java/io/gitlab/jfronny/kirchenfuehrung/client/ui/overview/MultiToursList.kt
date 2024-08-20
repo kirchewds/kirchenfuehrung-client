@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import io.gitlab.jfronny.kirchenfuehrung.client.model.Tour
+import io.gitlab.jfronny.kirchenfuehrung.client.ui.WebImage
 
 @Composable
 fun MultiToursList(
@@ -86,7 +87,7 @@ private fun TourCardTop(tour: Tour, modifier: Modifier = Modifier) {
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        TourImage(tour, Modifier
+        WebImage(tour.cover, Modifier
             .heightIn(max = 180.dp)
             .fillMaxWidth()
             .clip(shape = MaterialTheme.shapes.medium), ContentScale.Crop)
@@ -116,7 +117,7 @@ private fun TourCardSimple(
             .clickable(onClick = { navigateToTour(tour.name) }),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        TourImage(tour, Modifier
+        WebImage(tour.cover, Modifier
             .padding(16.dp)
             .size(40.dp, 40.dp)
             .clip(MaterialTheme.shapes.small))

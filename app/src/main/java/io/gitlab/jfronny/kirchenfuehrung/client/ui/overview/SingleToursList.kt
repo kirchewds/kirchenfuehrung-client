@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.gitlab.jfronny.kirchenfuehrung.client.R
 import io.gitlab.jfronny.kirchenfuehrung.client.model.Tour
+import io.gitlab.jfronny.kirchenfuehrung.client.ui.WebImage
 
 @Composable
 fun SingleToursList(
@@ -52,7 +53,7 @@ fun ExpandedList(tour: Tour, onTourTapped: (id: String) -> Unit, modifier: Modif
             contentAlignment = Alignment.Center,
             modifier = Modifier.weight(1f)
         ) {
-            TourImage(tour = tour, modifier = Modifier.clip(RoundedCornerShape(6.dp)))
+            WebImage(url = tour.cover, modifier = Modifier.clip(RoundedCornerShape(6.dp)))
         }
 
         Column(
@@ -79,7 +80,7 @@ fun PhoneList(tour: Tour, onTourTapped: (id: String) -> Unit, modifier: Modifier
             contentAlignment = Alignment.Center,
             modifier = Modifier.weight(1f)
         ) {
-            TourImage(tour = tour, modifier = Modifier.clip(RoundedCornerShape(6.dp)))
+            WebImage(url = tour.cover, modifier = Modifier.clip(RoundedCornerShape(6.dp)))
         }
 
         ControlsContent(tour, onTourTapped)
