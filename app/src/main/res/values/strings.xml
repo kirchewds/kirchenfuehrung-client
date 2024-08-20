@@ -5,8 +5,10 @@
     <string name="about_author">Created by Johannes Frohnmeyer</string>
     <string name="about_bugs">File a bug report</string>
     <string name="about_code">Source Code</string>
+    <string name="about_netzgottesdienst" translatable="false">Netzgottesdienst</string>
     <string name="about_legal">Legal</string>
     <string name="about_legal_text" translatable="false">Kath. Kirchengemeinde St. Peter und Paul\nKapuzinerberg 1\n71263 Weil der Stadt\ninfo@kirchewds.de</string>
+    <string name="about_sponsor">Supported by the Pfarrer Helmut Nann-Stiftung zur Erhaltung der St. Peter und Paul Kirche in Weil der Stadt</string>
 
     <!-- Notification name -->
     <string name="music_player">Music Player</string>
@@ -27,5 +29,4 @@
     <string name="feedback_dismiss">Not now</string>
     <string name="feedback_message">Please send us any feedback you have!</string>
     <string name="feedback_send">OK</string>
-    <string name="about_sponsor">Supported by the Pfarrer Helmut Nann-Stiftung zur Erhaltung der St. Peter und Paul Kirche in Weil der Stadt</string>
 </resources>

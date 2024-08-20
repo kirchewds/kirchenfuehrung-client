@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.RssFeed
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -75,6 +76,11 @@ fun AboutRoute() {
                     url = "https://gitlab.com/kirchewds/kirchenfuehrung-client"
                 )
                 HorizontalDivider()
+                LinkTile(
+                    icon = { Icon(Icons.Default.RssFeed, null) },
+                    title = { Text(stringResource(R.string.about_netzgottesdienst)) },
+                    url = "http://www.netzgottesdienst.de/"
+                )
                 val clipboardManager = LocalClipboardManager.current
                 val legalText = stringResource(R.string.about_legal_text)
                 ActionTile(
