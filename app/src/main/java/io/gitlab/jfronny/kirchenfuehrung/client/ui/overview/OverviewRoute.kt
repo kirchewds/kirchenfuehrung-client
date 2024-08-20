@@ -54,6 +54,7 @@ import io.gitlab.jfronny.kirchenfuehrung.client.R
 import io.gitlab.jfronny.kirchenfuehrung.client.model.Cookie
 import io.gitlab.jfronny.kirchenfuehrung.client.model.Tour
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.ClientNavigationActions
+import io.gitlab.jfronny.kirchenfuehrung.client.ui.Wordmark
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.components.ClientSnackbarHost
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.components.pullrefresh.PullRefreshIndicator
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.components.pullrefresh.pullRefresh
@@ -157,19 +158,9 @@ private fun OverviewTopAppBar(
     topAppBarState: TopAppBarState = rememberTopAppBarState(),
     onSelectAbout: () -> Unit
 ) {
-    val context = LocalContext.current
-    val title = stringResource(id = R.string.app_name)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
     CenterAlignedTopAppBar(
-        title = {
-            Image(
-                painter = painterResource(id = R.drawable.ic_client_wordmark),
-                contentDescription = title,
-                contentScale = ContentScale.Inside,
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground),
-                modifier = Modifier.fillMaxWidth()
-            )
-        },
+        title = { Wordmark() },
         actions = {
             IconButton(onClick = onSelectAbout) {
                 Icon(
