@@ -96,6 +96,13 @@ fun AboutRoute() {
                     subtitle = { Text(legalText) },
                     action = { clipboardManager.setText(AnnotatedString(legalText)) }
                 )
+                HorizontalDivider()
+                ActionTile(
+                    icon = {  },
+                    title = { Text(stringResource(id = R.string.about_sponsor)) },
+                    subtitle = { Image(painter = painterResource(id = R.drawable.logo_nann_stiftung), contentDescription = null) },
+                    action = { }
+                )
             }
         }
     }

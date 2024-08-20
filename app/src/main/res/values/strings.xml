@@ -27,4 +27,5 @@
     <string name="feedback_dismiss">Not now</string>
     <string name="feedback_message">Please send us any feedback you have!</string>
     <string name="feedback_send">OK</string>
+    <string name="about_sponsor">Supported by the Pfarrer Helmut Nann-Stiftung zur Erhaltung der St. Peter und Paul Kirche in Weil der Stadt</string>
 </resources>
