@@ -24,14 +24,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -59,6 +57,7 @@ import io.gitlab.jfronny.kirchenfuehrung.client.ui.components.pullrefresh.PullRe
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.components.pullrefresh.pullRefresh
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.components.pullrefresh.rememberPullRefreshState
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.rememberContentPaddingForScreen
+import io.gitlab.jfronny.kirchenfuehrung.client.util.ErrorMessage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -118,22 +117,10 @@ fun OverviewRoute(
                     Box(contentModifier.fillMaxSize()) {}
                     val errorMessage = remember(state) { state.errorMessages[0] }
 
-                    val errorMessageText: String = stringResource(errorMessage.messageId)
-                    val retryMessageText = stringResource(id = R.string.retry)
-
                     val onRefreshToursState by rememberUpdatedState(overviewViewModel::refreshTours)
                     val onErrorDismissState by rememberUpdatedState(overviewViewModel::errorShown)
 
-                    LaunchedEffect(errorMessageText, retryMessageText, snackbarHostState) {
-                        val snackbarResult = snackbarHostState.showSnackbar(
-                            message = errorMessageText,
-                            actionLabel = retryMessageText
-                        )
-                        if (snackbarResult == SnackbarResult.ActionPerformed) {
-                            onRefreshToursState()
-                        }
-                        onErrorDismissState(errorMessage.id)
-                    }
+                    ErrorDialog(message = errorMessage, dismiss = onErrorDismissState, retry = onRefreshToursState)
                 }
                 OverviewUiState.Empty -> {
                     Box(contentModifier.fillMaxSize()) {}
@@ -141,7 +128,7 @@ fun OverviewRoute(
                 OverviewUiState.Loading -> {
                     Box(
                         contentAlignment = Alignment.Center,
-                        modifier = Modifier
+                        modifier = contentModifier
                             .fillMaxSize()
                             .windowInsetsPadding(WindowInsets.systemBars)
                     ) {
@@ -252,6 +239,57 @@ fun FeedbackDialog(feedback: Cookie.Feedback, dismiss: () -> Unit) {
                     }) {
                         Text(
                             stringResource(R.string.feedback_send),
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(top = 5.dp, bottom = 5.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ErrorDialog(message: ErrorMessage, dismiss: (Long) -> Unit, retry: () -> Unit) {
+    val dismiss = { dismiss(message.id) }
+    val retry = { dismiss(); retry() }
+    Dialog(onDismissRequest = dismiss) {
+        Card(
+            shape = RoundedCornerShape(10.dp),
+            modifier = Modifier.padding(10.dp, 5.dp, 10.dp, 10.dp)
+        ) {
+            Column {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = stringResource(R.string.error_title),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(top = 5.dp)
+                            .fillMaxWidth(),
+                        style = MaterialTheme.typography.labelLarge,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = stringResource(message.messageId),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(top = 10.dp, start = 25.dp, end = 25.dp)
+                            .fillMaxWidth(),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp)
+                        .background(MaterialTheme.colorScheme.secondaryContainer),
+                    horizontalArrangement = Arrangement.SpaceAround) {
+                    TextButton(onClick = retry) {
+                        Text(
+                            stringResource(id = R.string.retry),
                             fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(top = 5.dp, bottom = 5.dp)

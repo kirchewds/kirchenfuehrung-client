@@ -5,7 +5,8 @@
     <string name="about_author">Erstellt von Johannes Frohnmeyer</string>
     <string name="about_bugs">Fehler melden</string>
     <string name="about_code">Quelltext</string>
-    <string name="music_player">Musik-Player</string>
+    <string name="music_player">Wiedergabe</string>
+    <string name="error_title">Fehler</string>
     <string name="error_tours_load">Konnte Touren nicht laden</string>
     <string name="error_tour_load">Konnte Tour nicht laden</string>
     <string name="error_not_found">Kapitel nicht gefunden</string>

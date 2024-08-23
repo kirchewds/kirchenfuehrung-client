@@ -11,8 +11,9 @@
     <string name="about_sponsor">Supported by the Pfarrer Helmut Nann-Stiftung zur Erhaltung der St. Peter und Paul Kirche in Weil der Stadt</string>
 
     <!-- Notification name -->
-    <string name="music_player">Music Player</string>
+    <string name="music_player">Playback</string>
 
+    <string name="error_title">Error</string>
     <string name="error_tours_load">Could not load tours</string>
     <string name="error_tour_load">Could not load tour</string>
     <string name="error_not_found">Track not found</string>
