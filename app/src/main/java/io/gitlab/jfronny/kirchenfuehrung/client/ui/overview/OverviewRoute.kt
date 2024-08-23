@@ -6,9 +6,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -35,7 +38,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -50,7 +52,7 @@ import io.gitlab.jfronny.kirchenfuehrung.client.R
 import io.gitlab.jfronny.kirchenfuehrung.client.model.Cookie
 import io.gitlab.jfronny.kirchenfuehrung.client.model.Tour
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.ClientNavigationActions
-import io.gitlab.jfronny.kirchenfuehrung.client.ui.WebImage
+import io.gitlab.jfronny.kirchenfuehrung.client.ui.LoadingAnimation
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.Wordmark
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.components.ClientSnackbarHost
 import io.gitlab.jfronny.kirchenfuehrung.client.ui.components.pullrefresh.PullRefreshIndicator
@@ -133,8 +135,18 @@ fun OverviewRoute(
                         onErrorDismissState(errorMessage.id)
                     }
                 }
-                OverviewUiState.Empty, OverviewUiState.Loading -> {
+                OverviewUiState.Empty -> {
                     Box(contentModifier.fillMaxSize()) {}
+                }
+                OverviewUiState.Loading -> {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .windowInsetsPadding(WindowInsets.systemBars)
+                    ) {
+                        LoadingAnimation(MaterialTheme.colorScheme.onBackground)
+                    }
                 }
             }
 
