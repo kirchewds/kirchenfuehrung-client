@@ -68,7 +68,7 @@ fun WebImage(url: String?, modifier: Modifier = Modifier.clip(RoundedCornerShape
         )
     } else {
         if (state is AsyncImagePainter.State.Loading) {
-            LoadingAnimation()
+            LoadingAnimation(MaterialTheme.colorScheme.onBackground)
         }
 
         var zoom by remember { mutableFloatStateOf(1f) }
@@ -108,7 +108,7 @@ fun WebImage(url: String?, modifier: Modifier = Modifier.clip(RoundedCornerShape
 }
 
 @Composable
-fun LoadingAnimation() {
+fun LoadingAnimation(color: Color) {
     val animation = rememberInfiniteTransition()
     val progress by animation.animateFloat(
         initialValue = 0f,
@@ -126,7 +126,7 @@ fun LoadingAnimation() {
             .alpha(1f - progress)
             .border(
                 5.dp,
-                color = Color.Black,
+                color = color,
                 shape = CircleShape
             )
     )
