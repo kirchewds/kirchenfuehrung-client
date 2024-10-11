@@ -13,6 +13,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -30,11 +31,15 @@ fun ClientApp(repository: ToursRepository, widthSizeClass: WindowWidthSizeClass)
 
         val isExpandedScreen = widthSizeClass == WindowWidthSizeClass.Expanded
         val sizeAwareDrawerState = rememberSizeAwareDrawerState(isExpandedScreen)
+
+        val configuration = LocalConfiguration.current
+        val screenWidth = configuration.screenWidthDp.dp.value
+        val screenHeight = configuration.screenHeightDp.dp.value
         
         Row {
             ClientNavGraph(
                 repository = repository,
-                isExpandedScreen = isExpandedScreen,
+                isExpandedScreen = screenWidth > screenHeight,
                 navController = navController
             )
         }

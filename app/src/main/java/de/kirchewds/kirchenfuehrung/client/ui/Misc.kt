@@ -35,6 +35,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImagePainter
@@ -50,7 +51,7 @@ fun Wordmark() {
 //            contentDescription = stringResource(id = R.string.app_name),
 //            modifier = Modifier.size(48.dp)
 //        )
-        Text(stringResource(id = R.string.app_name), style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(id = R.string.app_title), style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
     }
 }
 
