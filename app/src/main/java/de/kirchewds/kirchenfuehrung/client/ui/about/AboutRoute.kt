@@ -6,14 +6,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.RssFeed
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,6 +32,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import de.kirchewds.kirchenfuehrung.client.R
 import de.kirchewds.kirchenfuehrung.client.ui.Wordmark
@@ -51,50 +51,53 @@ fun AboutRoute() {
             .padding(innerPadding)
             .fillMaxSize()) {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                LinkTile(
-                    icon = { Icon(Icons.Default.Person, null) },
-                    title = { Text(stringResource(R.string.about_author)) },
-                    url = "https://jfronny.gitlab.io/contact.html"
-                )
-                val context = LocalContext.current
-                val address = "contact-project+kirchewds-kirchenfuehrung-client-60715858-issue-@incoming.gitlab.com"
-                ActionTile(
-                    icon = { Icon(Icons.Default.BugReport, null) },
-                    title = { Text(stringResource(R.string.about_bugs)) },
-                    subtitle = { Text(address) },
-                    action = {
-                        context.startActivity(Intent(Intent.ACTION_SENDTO).apply {
-                            this.data = "mailto:".toUri()
-                            this.putExtra(Intent.EXTRA_EMAIL, arrayOf(address))
-                            this.putExtra(Intent.EXTRA_SUBJECT, "Bug report")
-                        })
-                    }
-                )
-                LinkTile(
-                    icon = { Icon(Icons.Default.Code, null) },
-                    title = { Text(stringResource(R.string.about_code)) },
-                    url = "https://gitlab.com/kirchewds/kirchenfuehrung-client"
-                )
-                HorizontalDivider()
-                LinkTile(
-                    icon = { Icon(Icons.Default.RssFeed, null) },
-                    title = { Text(stringResource(R.string.about_netzgottesdienst)) },
-                    url = "http://www.netzgottesdienst.de/"
-                )
+                val uriHandler = LocalUriHandler.current
                 val clipboardManager = LocalClipboardManager.current
+                val context = LocalContext.current
+                val bugAddress = "contact-project+kirchewds-kirchenfuehrung-client-60715858-issue-@incoming.gitlab.com"
                 val legalText = stringResource(R.string.about_legal_text)
+
                 ActionTile(
-                    icon = { Icon(Icons.Default.Gavel, null) },
+                    icon = { Image(painter = painterResource(id = R.drawable.logo_netzgottesdienst), null, modifier = Modifier.size(24.dp)) },
+                    title = { Text(stringResource(R.string.about_netzgottesdienst)) },
+                    subtitle = { Text(stringResource(R.string.about_netzgottesdienst_text)) },
+                    action = { uriHandler.openUri("http://www.netzgottesdienst.de") }
+                )
+                ActionTile(
+                    icon = { Image(painter = painterResource(id = R.drawable.logo_kirche), null, modifier = Modifier.size(24.dp)) },
                     title = { Text(stringResource(R.string.about_legal)) },
                     subtitle = { Text(legalText) },
                     action = { clipboardManager.setText(AnnotatedString(legalText)) }
                 )
                 HorizontalDivider()
                 ActionTile(
-                    icon = {  },
-                    title = { Text(stringResource(id = R.string.about_sponsor)) },
-                    subtitle = { Image(painter = painterResource(id = R.drawable.logo_nann_stiftung), contentDescription = null) },
+                    icon = { Image(painter = painterResource(id = R.drawable.logo_nann_stiftung), null, modifier = Modifier.size(24.dp)) },
+                    title = { },
+                    subtitle = { Text(stringResource(id = R.string.about_sponsor)) },
                     action = { }
+                )
+                HorizontalDivider()
+                ActionTile(
+                    icon = { Icon(Icons.Default.Person, null) },
+                    title = { Text(stringResource(R.string.about_author)) },
+                    action = { uriHandler.openUri("https://jfronny.gitlab.io/contact.html") }
+                )
+                ActionTile(
+                    icon = { Icon(Icons.Default.BugReport, null) },
+                    title = { Text(stringResource(R.string.about_bugs)) },
+//                    subtitle = { Text(address) },
+                    action = {
+                        context.startActivity(Intent(Intent.ACTION_SENDTO).apply {
+                            this.data = "mailto:".toUri()
+                            this.putExtra(Intent.EXTRA_EMAIL, arrayOf(bugAddress))
+                            this.putExtra(Intent.EXTRA_SUBJECT, "Bug report")
+                        })
+                    }
+                )
+                ActionTile(
+                    icon = { Icon(Icons.Default.Code, null) },
+                    title = { Text(stringResource(R.string.about_code)) },
+                    action = { uriHandler.openUri("https://gitlab.com/kirchewds/kirchenfuehrung-client") }
                 )
             }
         }
@@ -102,25 +105,10 @@ fun AboutRoute() {
 }
 
 @Composable
-fun LinkTile(
-    icon: @Composable () -> Unit,
-    title: @Composable () -> Unit,
-    url: String
-) {
-    val handler = LocalUriHandler.current
-    ActionTile(
-        icon = icon,
-        title = title,
-        subtitle = { Text(url) },
-        action = { handler.openUri(url) }
-    )
-}
-
-@Composable
 fun ActionTile(
     icon: @Composable () -> Unit,
     title: @Composable () -> Unit,
-    subtitle: @Composable () -> Unit,
+    subtitle: @Composable () -> Unit = {},
     action: () -> Unit
 ) {
     Card(

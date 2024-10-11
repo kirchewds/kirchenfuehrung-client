@@ -21,6 +21,7 @@
     <string name="feedback_dismiss">Jetzt nicht</string>
     <string name="feedback_message">Möchten Sie uns eine Rückmeldung zur Kirchenführung geben?</string>
     <string name="feedback_send">OK</string>
+    <string name="about_netzgottesdienst_text">Besuchen Sie die Live-Übertragung unserer Gottesdienste</string>
     <string name="about_legal">Impressum</string>
     <string name="about_sponsor">Unterstützt durch die Pfarrer Helmut Nann-Stiftung zur Erhaltung der St. Peter und Paul Kirche in Weil der Stadt</string>
 </resources>

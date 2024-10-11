@@ -1,14 +1,15 @@
 <resources>
     <string name="app_name" translatable="false">Kirche Weil der Stadt</string>
-    <string name="app_title" translatable="false">St. Peter und Paul\nWeil der Stadt</string>
+    <string name="app_title" translatable="false">Kirche Weil der Stadt\nSt. Peter und Paul</string>
     <string name="retry">Retry</string>
     <string name="about">About</string>
     <string name="about_author">Created by Johannes Frohnmeyer</string>
     <string name="about_bugs">File a bug report</string>
     <string name="about_code">Source Code</string>
     <string name="about_netzgottesdienst" translatable="false">Netzgottesdienst</string>
+    <string name="about_netzgottesdienst_text">Visit the live broadcast of our church services</string>
     <string name="about_legal">Legal</string>
-    <string name="about_legal_text" translatable="false">Kath. Kirchengemeinde St. Peter und Paul\nKapuzinerberg 1\n71263 Weil der Stadt\ninfo@kirchewds.de</string>
+    <string name="about_legal_text" translatable="false">Kath. Kirchengemeinde\nSt. Peter und Paul\nKapuzinerberg 1\n71263 Weil der Stadt\ninfo@kirchewds.de</string>
     <string name="about_sponsor">Supported by the Pfarrer Helmut Nann-Stiftung zur Erhaltung der St. Peter und Paul Kirche in Weil der Stadt</string>
 
     <!-- Notification name -->

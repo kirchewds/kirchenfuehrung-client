@@ -222,7 +222,7 @@ fun PhonePlayer(track: Track, playerConnection: PlayerConnection, onBack: (Cooki
     ) {
         Box(
             contentAlignment = Alignment.Center,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f).padding(vertical = 16.dp)
         ) {
             WebImage(url = track.image?.toString())
         }
