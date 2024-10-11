@@ -35,11 +35,11 @@ val computedVersionCode by lazy {
 }
 
 android {
-    namespace = "io.gitlab.jfronny.kirchenfuehrung.client"
+    namespace = "de.kirchewds.kirchenfuehrung.client"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "io.gitlab.jfronny.kirchenfuehrung.client"
+        applicationId = "de.kirchewds.kirchenfuehrung.client"
         minSdk = 22
         targetSdk = 33
         versionCode = computedVersionCode
