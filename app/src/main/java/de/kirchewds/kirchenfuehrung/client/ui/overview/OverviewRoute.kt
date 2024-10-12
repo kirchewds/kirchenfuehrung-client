@@ -57,6 +57,7 @@ import de.kirchewds.kirchenfuehrung.client.ui.components.pullrefresh.PullRefresh
 import de.kirchewds.kirchenfuehrung.client.ui.components.pullrefresh.pullRefresh
 import de.kirchewds.kirchenfuehrung.client.ui.components.pullrefresh.rememberPullRefreshState
 import de.kirchewds.kirchenfuehrung.client.ui.rememberContentPaddingForScreen
+import de.kirchewds.kirchenfuehrung.client.util.CoilBitmapLoader
 import de.kirchewds.kirchenfuehrung.client.util.ErrorMessage
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -92,6 +93,13 @@ fun OverviewRoute(
         Box(Modifier.pullRefresh(pullRefreshState)) {
             when (val state = uiState) {
                 is OverviewUiState.Tours -> {
+                    // Hack: preload first image of each tour to work around images loading after sound
+                    val context = LocalContext.current
+                    (listOf(state.highlighted) + state.other)
+                        .mapNotNull { it.tracks.firstOrNull() }
+                        .mapNotNull { it.image }
+                        .forEach { CoilBitmapLoader.preload(context, it) }
+
                     if (state.other.isEmpty()) {
                         SingleToursList(
                             tour = state.highlighted,
