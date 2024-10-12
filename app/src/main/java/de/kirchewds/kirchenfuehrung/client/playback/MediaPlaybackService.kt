@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
-import android.net.Uri
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
@@ -18,18 +17,14 @@ import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
-import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
-import androidx.media3.datasource.DataSpec
-import androidx.media3.datasource.DefaultDataSource
-import androidx.media3.datasource.ResolvingDataSource
 import androidx.media3.datasource.cache.CacheDataSource
-import androidx.media3.datasource.cache.CacheWriter
 import androidx.media3.datasource.cache.SimpleCache
-import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.offline.DownloadRequest
+import androidx.media3.exoplayer.offline.DownloadService
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.extractor.mp3.Mp3Extractor
 import androidx.media3.session.DefaultMediaNotificationProvider
@@ -50,20 +45,17 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
-import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
-import java.net.ConnectException
-import java.net.SocketException
-import java.net.UnknownHostException
 import javax.inject.Inject
 
 @OptIn(UnstableApi::class)
 @AndroidEntryPoint
-class MediaPlaybackService: MediaLibraryService(), SimplePlayerListener, MediaLibraryService.MediaLibrarySession.Callback {
-    @Inject lateinit var toursRepository: ToursRepository
-    @Inject lateinit var playerCache: SimpleCache
+class MediaPlaybackService: MediaLibraryService(), WithDataSources, Player.Listener, MediaLibraryService.MediaLibrarySession.Callback {
+    @Inject override lateinit var toursRepository: ToursRepository
+    @Inject override lateinit var playerCache: SimpleCache
+    @Inject override lateinit var httpClient: OkHttpClient
+    override val context = this
 
     private val scope = CoroutineScope(Dispatchers.IO) + Job()
     lateinit var player: ExoPlayer
@@ -86,47 +78,23 @@ class MediaPlaybackService: MediaLibraryService(), SimplePlayerListener, MediaLi
         }
     }
 
-    private fun createCacheDataSource(): CacheDataSource.Factory =
-        CacheDataSource.Factory()
-            .setCache(playerCache)
-            .setUpstreamDataSourceFactory(DefaultDataSource.Factory(this, OkHttpDataSource.Factory(OkHttpClient.Builder().build())))
-
-    private fun createDataSourceFactory(cacheDataSource: CacheDataSource.Factory): DataSource.Factory {
-        val trackUrlCache = HashMap<String, Uri>()
-        return ResolvingDataSource.Factory(cacheDataSource) { dataSpec ->
-            val mediaId = dataSpec.key ?: error("No media id")
-
-            trackUrlCache[mediaId]?.let {
-                return@Factory dataSpec.withUri(it)
-            }
-
-            val track = runBlocking(Dispatchers.IO) {
-                toursRepository.getTrack(mediaId)
-            }.getOrElse {
-                when (it) {
-                    is NullPointerException -> throw PlaybackException(getString(R.string.error_not_found), it, PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND)
-                    is ConnectException, is UnknownHostException -> throw PlaybackException(getString(R.string.error_no_internet), it, PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED)
-                    is SocketException -> throw PlaybackException(getString(R.string.error_timeout), it, PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT)
-                    else -> throw PlaybackException(getString(R.string.error_unknown), it, PlaybackException.ERROR_CODE_REMOTE_ERROR)
-                }
-            }
-            trackUrlCache[mediaId] = track.audio
-
-            dataSpec.withUri(track.audio)
-        }
-    }
-
     private lateinit var cacheDataSource: CacheDataSource.Factory
+    private lateinit var dataSource: DataSource.Factory
     override fun onCreate() {
         super.onCreate()
         setMediaNotificationProvider(
-            DefaultMediaNotificationProvider(this, {NOTIFICATION_ID}, CHANNEL_ID, R.string.music_player)
+            DefaultMediaNotificationProvider(
+                this,
+                { NOTIFICATION_ID },
+                CHANNEL_ID,
+                R.string.music_player
+            )
                 .apply {
                     setSmallIcon(R.drawable.ic_launcher_foreground)
                 }
         )
-        cacheDataSource = createCacheDataSource()
-        val dataSource = createDataSourceFactory(cacheDataSource)
+        cacheDataSource = createCacheDataSource(false)
+        dataSource = cacheDataSource
         player = ExoPlayer.Builder(this)
             .setMediaSourceFactory(DefaultMediaSourceFactory(dataSource, Mp3Extractor.FACTORY))
             .setHandleAudioBecomingNoisy(true)
@@ -209,9 +177,17 @@ class MediaPlaybackService: MediaLibraryService(), SimplePlayerListener, MediaLi
 
     fun play(item: Tour) {
         player.clearMediaItems()
-        player.setMediaItems(item.tracks.map { it.toMediaItem() })
+        player.setMediaItems(item.tracks.map(Track::toMediaItem))
         player.prepare()
-        item.tracks.drop(2).forEach(::preload) // This is very hacky, but it should ensure that if the connection drops, we can still play the next tracks
+        preload(item.tracks)
+    }
+
+    private fun preload(tracks: List<Track>) {
+        for (track in tracks) {
+            track.image?.let(bitmapLoader::preload)
+            val downloadRequest = DownloadRequest.Builder(track.id, track.audio).setCustomCacheKey(track.id).build()
+            DownloadService.sendAddDownload(context, MediaDownloadService::class.java, downloadRequest, false)
+        }
     }
 
     fun stop() {
@@ -256,21 +232,6 @@ class MediaPlaybackService: MediaLibraryService(), SimplePlayerListener, MediaLi
     )
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo) = mediaSession
-
-    override fun updateTimeline() {
-        val idx = player.nextMediaItemIndex
-        if (idx != C.INDEX_UNSET) {
-            player.getMediaItemAt(idx).metadata?.let(::preload)
-        }
-    }
-
-    private fun preload(track: Track) {
-        track.image?.let(bitmapLoader::preload)
-        scope.launch {
-            val dataSource = cacheDataSource.createDataSourceForDownloading()
-            CacheWriter(dataSource, DataSpec(track.audio), null, null).cache()
-        }
-    }
 
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
         if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO) player.pause()

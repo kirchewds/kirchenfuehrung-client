@@ -14,6 +14,7 @@ import dagger.hilt.components.SingletonComponent
 import de.kirchewds.kirchenfuehrung.client.data.ToursRepository
 import de.kirchewds.kirchenfuehrung.client.data.impl.NetworkToursRepository
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.OkHttpClient
 import javax.inject.Singleton
 
 @Module
@@ -21,8 +22,18 @@ import javax.inject.Singleton
 object AppModule {
     @Singleton
     @Provides
-    fun provideRepository(@ApplicationContext context: Context): ToursRepository =
-        NetworkToursRepository(ClientApplication.TOURS_JSON_URI.toHttpUrl())
+    fun provideHttpClient(): OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor { chain ->
+            chain.proceed(chain.request().newBuilder()
+                .header("User-Agent", "Kirchenfuehrung/1.0")
+                .build())
+        }
+        .build()
+
+    @Singleton
+    @Provides
+    fun provideRepository(@ApplicationContext context: Context, httpClient: OkHttpClient): ToursRepository =
+        NetworkToursRepository(ClientApplication.TOURS_JSON_URI.toHttpUrl(), httpClient)
 
     @Singleton
     @Provides
@@ -35,7 +46,7 @@ object AppModule {
     @UnstableApi
     fun providePlayerCache(@ApplicationContext context: Context, databaseProvider: DatabaseProvider): SimpleCache =
         SimpleCache(
-            context.filesDir.resolve("exoplayer"),
+            context.cacheDir.resolve("exoplayer"),
             LeastRecentlyUsedCacheEvictor(1024 * 1024 * 1024L),
             databaseProvider
         )

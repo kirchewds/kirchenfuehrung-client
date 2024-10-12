@@ -17,9 +17,8 @@ import java.io.IOException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-class NetworkToursRepository(private val toursJsonUrl: HttpUrl): AbstractToursRepository() {
+class NetworkToursRepository(private val toursJsonUrl: HttpUrl, private val client: OkHttpClient): AbstractToursRepository() {
     private val gson = GsonBuilder().serializeNulls().create()
-    private val client = OkHttpClient()
     private val mutex = Mutex()
     private var tours: Tours? = null
 

@@ -19,7 +19,7 @@ data class Track(val name: String, val image: Uri?, val audio: Uri): Serializabl
     @OptIn(UnstableApi::class)
     fun toMediaItem() = MediaItem.Builder()
         .setMediaId(id)
-        .setUri(id)
+        .setUri(audio)
         .setCustomCacheKey(id)
         .setTag(this)
         .setMediaMetadata(
