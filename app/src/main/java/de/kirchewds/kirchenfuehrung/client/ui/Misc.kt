@@ -11,7 +11,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -27,21 +27,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import de.kirchewds.kirchenfuehrung.client.R
-import kotlin.math.roundToInt
 
 @Composable
 fun Wordmark() {
@@ -73,27 +73,28 @@ fun WebImage(url: String?, modifier: Modifier = Modifier.clip(RoundedCornerShape
         }
 
         var zoom by remember { mutableFloatStateOf(1f) }
-        var offsetX by remember { mutableFloatStateOf(0f) }
-        var offsetY by remember { mutableFloatStateOf(0f) }
+        var offset by remember { mutableStateOf(Offset(0f, 0f)) }
 
-        val configuration = LocalConfiguration.current
-        val screenWidth = configuration.screenWidthDp.dp.value
-        val screenHeight = configuration.screenHeightDp.dp.value
+        var frameSize: IntSize by remember { mutableStateOf(IntSize(0, 0)) }
 
         val zoomableModifier = modifier
-            .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
-            .graphicsLayer(scaleX = zoom, scaleY = zoom)
+            .graphicsLayer(scaleX = zoom, scaleY = zoom, translationX = offset.x, translationY = offset.y)
+            .onSizeChanged { frameSize = it }
             .pointerInput(Unit) {
                 detectTransformGestures { _, pan, gestureZoom, _ ->
                     zoom = (zoom * gestureZoom).coerceIn(1f, 4f)
                     if (zoom > 1) {
-                        val dx = pan.x * zoom
-                        val dy = pan.y * zoom
-                        offsetX = (offsetX + dx).coerceIn(-(screenWidth * zoom)..(screenWidth * zoom))
-                        offsetY = (offsetY + dy).coerceIn(-(screenHeight * zoom)..(screenHeight * zoom))
+                        val maxOffset = Offset(
+                            frameSize.width * (zoom - 1) / 2,
+                            frameSize.height * (zoom - 1) / 2
+                        )
+
+                        offset = Offset(
+                            (offset.x + pan.x * zoom).coerceIn(-maxOffset.x..maxOffset.x),
+                            (offset.y + pan.y * zoom).coerceIn(-maxOffset.y..maxOffset.y)
+                        )
                     } else {
-                        offsetX = 0f
-                        offsetY = 0f
+                        offset = Offset.Zero
                     }
                 }
             }
