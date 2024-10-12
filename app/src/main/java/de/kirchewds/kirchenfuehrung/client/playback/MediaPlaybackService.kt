@@ -128,7 +128,7 @@ class MediaPlaybackService: MediaLibraryService(), WithDataSources, Player.Liste
         audioManager = applicationContext.getSystemService()!!
         registerReceiver(headsetStateReceiver, IntentFilter().apply {
             headsetStateReceiver.supportedActions.forEach { addAction(it) }
-        })
+        }, RECEIVER_NOT_EXPORTED)
     }
 
     private val supportedTypes by lazy {

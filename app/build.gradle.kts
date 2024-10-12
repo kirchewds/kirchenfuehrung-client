@@ -41,7 +41,7 @@ android {
     defaultConfig {
         applicationId = "de.kirchewds.kirchenfuehrung.client"
         minSdk = 22
-        targetSdk = 33
+        targetSdk = 34
         versionCode = computedVersionCode
         versionName = computedVersionName
 
