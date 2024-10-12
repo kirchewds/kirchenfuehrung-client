@@ -76,10 +76,11 @@ assembleRelease:
   stage: release
   script:
     - echo $KEYSTORE_FILE | base64 -d > client.keystore.jks
-    - gradle assembleRelease -Pandroid.injected.signing.store.file=$(pwd)/client.keystore.jks -Pandroid.injected.signing.store.password=$KEYSTORE_PASSWORD -Pandroid.injected.signing.key.alias=$KEY_ALIAS -Pandroid.injected.signing.key.password=$KEY_PASSWORD
+    - gradle assembleRelease bundleRelease -Pandroid.injected.signing.store.file=$(pwd)/client.keystore.jks -Pandroid.injected.signing.store.password=$KEYSTORE_PASSWORD -Pandroid.injected.signing.key.alias=$KEY_ALIAS -Pandroid.injected.signing.key.password=$KEY_PASSWORD
   artifacts:
     paths:
       - app/build/outputs/apk/release
+      - app/build/outputs/bundle/release
 
 # Push the binary to pages for my fdroid scripts
 pages:
@@ -88,6 +89,7 @@ pages:
     - mkdir public
     - mv app/build/outputs/apk/release/output-metadata.json public/version.json
     - mv app/build/outputs/apk/release/*.apk public/
+    - mv app/build/outputs/bundle/release/*.aab public/
   artifacts:
     paths:
       - public
