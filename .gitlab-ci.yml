@@ -1,8 +1,8 @@
-image: gradle:jdk17
+image: eclipse-temurin:17-jdk-jammy
 
 variables:
-  ANDROID_COMPILE_SDK: "34"
-  ANDROID_BUILD_TOOLS: "34.0.0"
+  ANDROID_COMPILE_SDK: "35"
+  ANDROID_BUILD_TOOLS: "35.0.1"
   ANDROID_SDK_TOOLS: "11076708"
 
 # Packages installation before running script
@@ -52,14 +52,14 @@ stages:
 #  interruptible: true
 #  stage: build
 #  script:
-#    - gradle -Pci --console=plain :app:lintDebug -PbuildDir=lint
+#    - ./gradlew -Pci --console=plain :app:lintDebug -PbuildDir=lint
 #
 ## Make Project
 #assembleDebug:
 #  interruptible: true
 #  stage: build
 #  script:
-#    - gradle assembleDebug
+#    - ./gradlew assembleDebug
 #  artifacts:
 #    paths:
 #      - app/build/outputs/
@@ -69,14 +69,14 @@ stages:
 #  interruptible: true
 #  stage: test
 #  script:
-#    - gradle -Pci --console=plain :app:testDebug
+#    - ./gradlew -Pci --console=plain :app:testDebug
 
 # Assemble a signed release binary
 assembleRelease:
   stage: release
   script:
     - echo $KEYSTORE_FILE | base64 -d > client.keystore.jks
-    - gradle assembleRelease bundleRelease -Pandroid.injected.signing.store.file=$(pwd)/client.keystore.jks -Pandroid.injected.signing.store.password=$KEYSTORE_PASSWORD -Pandroid.injected.signing.key.alias=$KEY_ALIAS -Pandroid.injected.signing.key.password=$KEY_PASSWORD
+    - ./gradlew assembleRelease bundleRelease -Pandroid.injected.signing.store.file=$(pwd)/client.keystore.jks -Pandroid.injected.signing.store.password=$KEYSTORE_PASSWORD -Pandroid.injected.signing.key.alias=$KEY_ALIAS -Pandroid.injected.signing.key.password=$KEY_PASSWORD
   artifacts:
     paths:
       - app/build/outputs/apk/release
