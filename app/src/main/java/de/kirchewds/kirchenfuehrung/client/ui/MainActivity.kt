@@ -1,15 +1,13 @@
 package de.kirchewds.kirchenfuehrung.client.ui
 
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,6 +16,7 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import androidx.navigation.compose.rememberNavController
 import com.google.common.util.concurrent.MoreExecutors
 import dagger.hilt.android.AndroidEntryPoint
 import de.kirchewds.kirchenfuehrung.client.data.ToursRepository
@@ -27,7 +26,7 @@ import de.kirchewds.kirchenfuehrung.client.ui.viewer.LocalPlayerConnection
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var repository: ToursRepository
 
@@ -48,7 +47,11 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
-        bindService(Intent(this, MediaPlaybackService::class.java), serviceConnection, Context.BIND_AUTO_CREATE)
+        bindService(
+            Intent(this, MediaPlaybackService::class.java),
+            serviceConnection,
+            BIND_AUTO_CREATE
+        )
     }
 
     override fun onStop() {
@@ -74,11 +77,11 @@ class MainActivity : ComponentActivity() {
         )
 
         setContent {
-            val widthSizeClass = calculateWindowSizeClass(this).widthSizeClass
+            val navController = rememberNavController()
             CompositionLocalProvider(
                 LocalPlayerConnection provides playerConnection
             ) {
-                ClientApp(repository, widthSizeClass)
+                ClientApp(repository, navController)
             }
         }
     }

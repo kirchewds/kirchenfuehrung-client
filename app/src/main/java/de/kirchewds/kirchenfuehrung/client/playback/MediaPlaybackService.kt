@@ -48,6 +48,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.plus
 import okhttp3.OkHttpClient
 import javax.inject.Inject
+import androidx.core.net.toUri
 
 @OptIn(UnstableApi::class)
 @AndroidEntryPoint
@@ -118,7 +119,9 @@ class MediaPlaybackService: MediaLibraryService(), WithDataSources, Player.Liste
                 PendingIntent.getActivity(
                     this,
                     0,
-                    Intent(this, MainActivity::class.java),
+                    Intent(this, MainActivity::class.java).apply {
+                        data = "kirchenfuehrung://viewer".toUri()
+                    },
                     PendingIntent.FLAG_IMMUTABLE
                 )
             )
@@ -175,10 +178,14 @@ class MediaPlaybackService: MediaLibraryService(), WithDataSources, Player.Liste
             supportedDevices.isNotEmpty()
         }
 
+    var currentTour: String? = null
+        private set
+
     fun play(item: Tour) {
         player.clearMediaItems()
         player.setMediaItems(item.tracks.map(Track::toMediaItem))
         player.prepare()
+        currentTour = item.name
         preload(item.tracks)
     }
 

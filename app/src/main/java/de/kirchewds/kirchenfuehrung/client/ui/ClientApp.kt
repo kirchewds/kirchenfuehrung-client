@@ -1,67 +1,34 @@
 package de.kirchewds.kirchenfuehrung.client.ui
 
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.material3.DrawerState
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.rememberDrawerState
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavHostController
 import de.kirchewds.kirchenfuehrung.client.data.ToursRepository
 import de.kirchewds.kirchenfuehrung.client.ui.theme.AppTheme
 
 @Composable
-fun ClientApp(repository: ToursRepository, widthSizeClass: WindowWidthSizeClass) {
+fun ClientApp(
+    repository: ToursRepository,
+    navController: NavHostController
+) {
     AppTheme {
-        val navController = rememberNavController()
-
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        navBackStackEntry?.destination?.route ?: ClientDestinations.OVERVIEW
-
-        val isExpandedScreen = widthSizeClass == WindowWidthSizeClass.Expanded
-        val sizeAwareDrawerState = rememberSizeAwareDrawerState(isExpandedScreen)
-
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp.dp.value
         val screenHeight = configuration.screenHeightDp.dp.value
-        
-        Row {
-            ClientNavGraph(
-                repository = repository,
-                isExpandedScreen = screenWidth > screenHeight,
-                navController = navController
-            )
-        }
-    }
-}
 
-/**
- * Determine the drawer state to pass to the modal drawer.
- */
-@Composable
-private fun rememberSizeAwareDrawerState(isExpandedScreen: Boolean): DrawerState {
-    val drawerState = rememberDrawerState(DrawerValue.Closed)
-
-    return if (!isExpandedScreen) {
-        // If we want to allow showing the drawer, we use a real, remembered drawer
-        // state defined above
-        drawerState
-    } else {
-        // If we don't want to allow the drawer to be shown, we provide a drawer state
-        // that is locked closed. This is intentionally not remembered, because we
-        // don't want to keep track of any changes and always keep it closed
-        DrawerState(DrawerValue.Closed)
+        ClientNavGraph(
+            repository = repository,
+            isExpandedScreen = screenWidth > screenHeight,
+            navController = navController
+        )
     }
 }
 

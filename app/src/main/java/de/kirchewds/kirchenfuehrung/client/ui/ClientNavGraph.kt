@@ -9,7 +9,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import de.kirchewds.kirchenfuehrung.client.ClientApplication.Companion.TOUR_URI
@@ -19,6 +18,7 @@ import de.kirchewds.kirchenfuehrung.client.ui.ClientDestinations.TOUR_ID
 import de.kirchewds.kirchenfuehrung.client.ui.about.AboutRoute
 import de.kirchewds.kirchenfuehrung.client.ui.overview.OverviewRoute
 import de.kirchewds.kirchenfuehrung.client.ui.overview.OverviewViewModel
+import de.kirchewds.kirchenfuehrung.client.ui.viewer.LocalPlayerConnection
 import de.kirchewds.kirchenfuehrung.client.ui.viewer.ViewerRoute
 import de.kirchewds.kirchenfuehrung.client.ui.viewer.ViewerViewModel
 
@@ -27,7 +27,7 @@ fun ClientNavGraph(
     repository: ToursRepository,
     isExpandedScreen: Boolean,
     modifier: Modifier = Modifier,
-    navController: NavHostController = rememberNavController(),
+    navController: NavHostController,
     startDestination: String = ClientDestinations.OVERVIEW
 ) {
     val cookie = remember { mutableStateOf<Cookie>(Cookie.None) }
@@ -54,16 +54,26 @@ fun ClientNavGraph(
         }
         composable(
             route = "${ClientDestinations.VIEWER}/{$TOUR_ID}",
-            arguments = listOf(navArgument(TOUR_ID) { type = NavType.StringType }),
+            arguments = listOf(navArgument(TOUR_ID) {
+                type = NavType.StringType
+                nullable = true
+            }),
             deepLinks = listOf(
                 navDeepLink {
-                    uriPattern = "$TOUR_URI/${ClientDestinations.VIEWER}?$TOUR_ID={$TOUR_ID}"
+                    uriPattern = "$TOUR_URI${ClientDestinations.VIEWER}?$TOUR_ID={$TOUR_ID}"
+                },
+                navDeepLink {
+                    uriPattern = "$TOUR_URI${ClientDestinations.VIEWER}"
                 }
             )
         ) { navBackStackEntry ->
             val tourId = navBackStackEntry.arguments?.getString(TOUR_ID)
             val viewerViewModel: ViewerViewModel = viewModel(
-                factory = ViewerViewModel.provideFactory(repository, tourId)
+                factory = ViewerViewModel.provideFactory(
+                    repository,
+                    tourId ?: LocalPlayerConnection.current?.currentTour,
+                    tourId == null
+                )
             )
             ViewerRoute(
                 viewerViewModel = viewerViewModel,

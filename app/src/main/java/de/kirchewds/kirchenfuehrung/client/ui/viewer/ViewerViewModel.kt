@@ -38,7 +38,8 @@ private data class ViewerViewModelState(
 // id == null is equivalent to the highlighted tour
 class ViewerViewModel(
     private val toursRepository: ToursRepository,
-    private val id: String?
+    private val id: String?,
+    val resume: Boolean,
 ): ViewModel() {
     private val viewModelState = MutableStateFlow(
         ViewerViewModelState(isLoading = true)
@@ -60,7 +61,7 @@ class ViewerViewModel(
         viewModelState.update { it.copy(isLoading = true) }
 
         viewModelScope.launch {
-            val tour = toursRepository.getTour(id!!)
+            val tour = id?.let { toursRepository.getTour(id) } ?: toursRepository.getHighlighted()
             viewModelState.update { state ->
                 tour.fold(onSuccess = {
                     state.copy(
@@ -87,10 +88,11 @@ class ViewerViewModel(
     companion object {
         fun provideFactory(
             toursRepository: ToursRepository,
-            id: String?
+            id: String?,
+            resume: Boolean,
         ): ViewModelProvider.Factory = object: ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return ViewerViewModel(toursRepository, id) as T
+                return ViewerViewModel(toursRepository, id, resume) as T
             }
         }
     }

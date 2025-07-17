@@ -88,6 +88,7 @@ fun ViewerRoute(
 
     ViewerRoute(
         uiState = uiState,
+        resume = viewerViewModel.resume,
         isExpandedScreen = isExpandedScreen,
         onErrorDismiss = viewerViewModel::errorShown,
         onRefresh = viewerViewModel::refreshTour,
@@ -100,6 +101,7 @@ fun ViewerRoute(
 @Composable
 fun ViewerRoute(
     uiState: ViewerUiState,
+    resume: Boolean,
     isExpandedScreen: Boolean,
     onErrorDismiss: (Long) -> Unit,
     onRefresh: () -> Unit,
@@ -111,7 +113,7 @@ fun ViewerRoute(
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
 
-    var initial by rememberSaveable { mutableStateOf(true) }
+    var initial by rememberSaveable { mutableStateOf(!resume) }
 
     fun goBack(cookie: Cookie) {
         playerConnection.stop()
