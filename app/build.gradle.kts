@@ -8,7 +8,7 @@ plugins {
 
 val versionMajor = 1
 val versionMinor = 0
-val versionPatch = 0
+val versionPatch = 1
 val versionBuild = System.getenv("CI_PIPELINE_IID")?.toIntOrNull() ?: 0
 
 val computedVersionName by lazy { "$versionMajor.$versionMinor.$versionPatch" + if (versionBuild > 0) "+$versionBuild" else "" }
