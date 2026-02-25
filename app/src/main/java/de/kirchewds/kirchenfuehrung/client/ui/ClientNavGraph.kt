@@ -1,20 +1,12 @@
 package de.kirchewds.kirchenfuehrung.client.ui
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
-import androidx.navigation.navDeepLink
-import de.kirchewds.kirchenfuehrung.client.ClientApplication.Companion.TOUR_URI
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.scene.DialogSceneStrategy
+import androidx.navigation3.ui.NavDisplay
 import de.kirchewds.kirchenfuehrung.client.data.ToursRepository
-import de.kirchewds.kirchenfuehrung.client.model.Cookie
-import de.kirchewds.kirchenfuehrung.client.ui.ClientDestinations.TOUR_ID
 import de.kirchewds.kirchenfuehrung.client.ui.about.AboutRoute
 import de.kirchewds.kirchenfuehrung.client.ui.overview.OverviewRoute
 import de.kirchewds.kirchenfuehrung.client.ui.overview.OverviewViewModel
@@ -26,18 +18,10 @@ import de.kirchewds.kirchenfuehrung.client.ui.viewer.ViewerViewModel
 fun ClientNavGraph(
     repository: ToursRepository,
     isExpandedScreen: Boolean,
-    modifier: Modifier = Modifier,
-    navController: NavHostController,
-    startDestination: String = ClientDestinations.OVERVIEW
+    navController: Navigator,
 ) {
-    val cookie = remember { mutableStateOf<Cookie>(Cookie.None) }
-    val navigationActions = remember(navController, cookie) { ClientNavigationActions(navController, cookie) }
-    NavHost(
-        navController = navController,
-        startDestination = startDestination,
-        modifier = modifier
-    ) {
-        composable(route = ClientDestinations.OVERVIEW) {
+    val entryProvider = entryProvider {
+        entry<ClientDestinations.Overview> {
             val overviewViewModel: OverviewViewModel = viewModel(
                 factory = OverviewViewModel.provideFactory(
                     toursRepository = repository
@@ -46,28 +30,14 @@ fun ClientNavGraph(
             OverviewRoute(
                 overviewViewModel = overviewViewModel,
                 isExpandedScreen = isExpandedScreen,
-                navigation = navigationActions
+                navigation = navController
             )
         }
-        composable(route = ClientDestinations.ABOUT) {
+        entry<ClientDestinations.About> {
             AboutRoute()
         }
-        composable(
-            route = "${ClientDestinations.VIEWER}/{$TOUR_ID}",
-            arguments = listOf(navArgument(TOUR_ID) {
-                type = NavType.StringType
-                nullable = true
-            }),
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "$TOUR_URI${ClientDestinations.VIEWER}?$TOUR_ID={$TOUR_ID}"
-                },
-                navDeepLink {
-                    uriPattern = "$TOUR_URI${ClientDestinations.VIEWER}"
-                }
-            )
-        ) { navBackStackEntry ->
-            val tourId = navBackStackEntry.arguments?.getString(TOUR_ID)
+        entry<ClientDestinations.Viewer> {
+            val tourId = it.id
             val viewerViewModel: ViewerViewModel = viewModel(
                 factory = ViewerViewModel.provideFactory(
                     repository,
@@ -78,8 +48,14 @@ fun ClientNavGraph(
             ViewerRoute(
                 viewerViewModel = viewerViewModel,
                 isExpandedScreen = isExpandedScreen,
-                navigation = navigationActions
+                navigation = navController
             )
         }
     }
+
+    NavDisplay(
+        entries = navController.toEntries(entryProvider),
+        onBack = { navController.navigateBack() },
+        sceneStrategy = remember { DialogSceneStrategy() }
+    )
 }

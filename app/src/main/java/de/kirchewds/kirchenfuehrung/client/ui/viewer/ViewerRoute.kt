@@ -66,7 +66,7 @@ import de.kirchewds.kirchenfuehrung.client.R
 import de.kirchewds.kirchenfuehrung.client.model.Cookie
 import de.kirchewds.kirchenfuehrung.client.model.Track
 import de.kirchewds.kirchenfuehrung.client.playback.PlayerConnection
-import de.kirchewds.kirchenfuehrung.client.ui.ClientNavigationActions
+import de.kirchewds.kirchenfuehrung.client.ui.Navigator
 import de.kirchewds.kirchenfuehrung.client.ui.WebImage
 import de.kirchewds.kirchenfuehrung.client.ui.components.ClientSnackbarHost
 import de.kirchewds.kirchenfuehrung.client.ui.components.ResizableIconButton
@@ -81,7 +81,7 @@ import kotlinx.coroutines.isActive
 fun ViewerRoute(
     viewerViewModel: ViewerViewModel,
     isExpandedScreen: Boolean,
-    navigation: ClientNavigationActions,
+    navigation: Navigator,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ) {
     val uiState by viewerViewModel.uiState.collectAsStateWithLifecycle()

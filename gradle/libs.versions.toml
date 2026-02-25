@@ -5,7 +5,7 @@ coroutines = "1.10.2"
 hilt = "2.59.2"
 lifecycle = "2.10.0"
 media3 = "1.9.2"
-navigation = "2.9.7"
+navigation = "1.0.1"
 okhttp = "5.3.2"
 activity = "1.12.4"
 androidGradlePlugin = "9.0.1"
@@ -38,17 +38,21 @@ compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview"
 material3 = { module = "androidx.compose.material3:material3" }
 material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 material3-window-size = { module = "androidx.compose.material3:material3-window-size-class" }
-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation" }
+
+navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation" }
+navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation" }
+
 activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity" }
 
-hilt = { group = 'com.google.dagger', name = 'hilt-android', version.ref = "hilt" }
-hilt-compiler = { group = 'com.google.dagger', name = 'hilt-compiler', version.ref = "hilt" }
+hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
 
 appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
 lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
+lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycle" }
 kotlinx-coroutines-guava = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-guava", version.ref = "coroutines" }
 
 junit = { module = "junit:junit", version.ref = "junit" }
@@ -63,5 +67,6 @@ android-library = { id = "com.android.library", version.ref = "androidGradlePlug
 legacy-kapt = { id = "com.android.legacy-kapt", version.ref = "androidGradlePlugin" }
 
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
 dagger-hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }

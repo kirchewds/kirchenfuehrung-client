@@ -46,10 +46,11 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.media3.common.util.UnstableApi
 import de.kirchewds.kirchenfuehrung.client.R
 import de.kirchewds.kirchenfuehrung.client.model.Cookie
 import de.kirchewds.kirchenfuehrung.client.model.Tour
-import de.kirchewds.kirchenfuehrung.client.ui.ClientNavigationActions
+import de.kirchewds.kirchenfuehrung.client.ui.Navigator
 import de.kirchewds.kirchenfuehrung.client.ui.LoadingAnimation
 import de.kirchewds.kirchenfuehrung.client.ui.Wordmark
 import de.kirchewds.kirchenfuehrung.client.ui.components.ClientSnackbarHost
@@ -60,12 +61,13 @@ import de.kirchewds.kirchenfuehrung.client.ui.rememberContentPaddingForScreen
 import de.kirchewds.kirchenfuehrung.client.util.CoilBitmapLoader
 import de.kirchewds.kirchenfuehrung.client.util.ErrorMessage
 
+@androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OverviewRoute(
     overviewViewModel: OverviewViewModel,
     isExpandedScreen: Boolean,
-    navigation: ClientNavigationActions,
+    navigation: Navigator,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ) {
     val uiState by overviewViewModel.uiState.collectAsStateWithLifecycle()

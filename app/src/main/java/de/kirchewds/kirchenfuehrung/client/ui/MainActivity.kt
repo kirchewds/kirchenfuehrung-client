@@ -16,9 +16,9 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
-import androidx.navigation.compose.rememberNavController
 import com.google.common.util.concurrent.MoreExecutors
 import dagger.hilt.android.AndroidEntryPoint
+import de.kirchewds.kirchenfuehrung.client.ClientApplication
 import de.kirchewds.kirchenfuehrung.client.data.ToursRepository
 import de.kirchewds.kirchenfuehrung.client.playback.MediaPlaybackService
 import de.kirchewds.kirchenfuehrung.client.playback.PlayerConnection
@@ -76,8 +76,18 @@ class MainActivity : AppCompatActivity() {
             MoreExecutors.directExecutor()
         )
 
+        val key: ClientDestinations = intent.data?.let { uri ->
+            when {
+                uri.scheme == ClientApplication.URI_SCHEME && uri.host == "viewer" && uri.path == "" -> {
+                    val tourId = uri.getQueryParameter("tour")
+                    ClientDestinations.Viewer(tourId)
+                }
+                else -> ClientDestinations.Overview
+            }
+        } ?: ClientDestinations.Overview
+
         setContent {
-            val navController = rememberNavController()
+            val navController = rememberNavigator(key)
             CompositionLocalProvider(
                 LocalPlayerConnection provides playerConnection
             ) {
